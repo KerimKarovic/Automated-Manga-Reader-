@@ -1,5 +1,0 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-pyttsx3
-opencv-python

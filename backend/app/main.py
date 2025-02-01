@@ -1,4 +1,6 @@
-from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, Depends
+from fastapi import FastAPI, File
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, init_db
 from app.ml.panel_detection import detect_panels

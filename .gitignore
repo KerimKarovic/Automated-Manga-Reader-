@@ -34,3 +34,13 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Python
+__pycache__/
+**/__pycache__/
+
+# Virtual environment
+venv/
+
+# SQLite database (if you don't want to version control it)
+backend/test.db

@@ -1,0 +1,68 @@
+/* frontend/src/App.css */
+
+.App {
+    text-align: center;
+    font-family: sans-serif;
+    padding: 20px;
+  }
+  
+  h1 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  h2 {
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    margin-bottom: 8px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Styles for image navigation */
+  .image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .image-container div {
+    flex: 1;
+    cursor: pointer;
+  }
+  
+  .image-container img {
+    max-width: 80%;
+    height: auto;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  p {
+    color: #666;
+    margin-top: 10px;
+  }
+  

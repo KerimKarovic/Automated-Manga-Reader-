@@ -21,8 +21,10 @@
         "backgroundColor": "#ffffff"
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ]
   }
 }

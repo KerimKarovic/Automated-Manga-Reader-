@@ -75,18 +75,23 @@ const App: React.FC = () => {
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Manga Reader</Text>
-        {mangas.length === 0 ? <Text>Loading mangas...</Text> : <Text>Select a Manga</Text>}
-        <ul>
-          {mangas.map((manga) => (
-            <li key={manga.id}>
-              <TouchableOpacity style={styles.button} onPress={() => setSelectedManga(manga)}>
+        {mangas.length === 0 ? (
+          <Text>Loading mangas...</Text>
+        ) : (
+          <View style={styles.listContainer}>
+            {mangas.map((manga) => (
+              <TouchableOpacity
+                key={manga.id}
+                style={styles.button}
+                onPress={() => setSelectedManga(manga)}
+              >
                 <Text style={styles.buttonText}>
                   {manga.title} by {manga.author}
                 </Text>
               </TouchableOpacity>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </View>
+        )}
       </ScrollView>
     );
   }
@@ -101,22 +106,25 @@ const App: React.FC = () => {
         {chapters.length === 0 ? (
           <Text>Loading chapters...</Text>
         ) : (
-          <ul>
+          <View style={styles.listContainer}>
             {chapters.map((chapter) => (
-              <li key={chapter.id}>
-                <TouchableOpacity style={styles.button} onPress={() => setSelectedChapter(chapter)}>
-                  <Text style={styles.buttonText}>
-                    Chapter {chapter.chapter} {chapter.volume ? `(Volume ${chapter.volume})` : ''}
-                  </Text>
-                </TouchableOpacity>
-              </li>
+              <TouchableOpacity
+                key={chapter.id}
+                style={styles.button}
+                onPress={() => setSelectedChapter(chapter)}
+              >
+                <Text style={styles.buttonText}>
+                  Chapter {chapter.chapter} {chapter.volume ? `(Volume ${chapter.volume})` : ''}
+                </Text>
+              </TouchableOpacity>
             ))}
-          </ul>
+          </View>
         )}
       </ScrollView>
     );
   }
 
+  // When a chapter is selected, display its images with navigation.
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
@@ -161,6 +169,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 10,
     color: '#555'
+  },
+  listContainer: {
+    width: '100%',
+    alignItems: 'center'
   },
   button: {
     backgroundColor: '#007bff',

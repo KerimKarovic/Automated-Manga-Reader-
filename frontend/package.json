@@ -2,7 +2,7 @@
   "name": "manga-reader-app",
   "license": "0BSD",
   "version": "1.0.0",
-  "main": "src/App.tsx",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

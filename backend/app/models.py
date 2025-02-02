@@ -1,4 +1,4 @@
-# app/models.py
+# backend/app/models.py
 
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
@@ -6,33 +6,35 @@ from app.database import Base
 
 class Manga(Base):
     __tablename__ = "manga"
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     author = Column(String, index=True)
-    comment_thread_id = Column(Integer, nullable=True)
-    replies_count = Column(Integer, nullable=True)
-    
-    # Relationship to chapters
+    # Relationship: one manga can have many chapters.
     chapters = relationship("Chapter", back_populates="manga")
 
 class Chapter(Base):
     __tablename__ = "chapter"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    number = Column(Integer)
+
+    # We use the MangaDex chapter ID (UUID string) as the primary key.
+    id = Column(String, primary_key=True, index=True)
     manga_id = Column(Integer, ForeignKey("manga.id"))
-    
-    # Relationship to the parent manga and its pages
-    manga = relationship("Manga", back_populates="chapters")
+    volume = Column(String, nullable=True)
+    chapter_number = Column(String, nullable=True)
+    title = Column(String, nullable=True)
+    translated_language = Column(String, nullable=False)
+    chapter_hash = Column(String, nullable=False)  # Used for constructing image URLs
+
+    # Relationship: one chapter can have many pages.
     pages = relationship("Page", back_populates="chapter")
+    manga = relationship("Manga", back_populates="chapters")
 
 class Page(Base):
     __tablename__ = "page"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    chapter_id = Column(Integer, ForeignKey("chapter.id"))
-    image_url = Column(String)
-    
-    # Relationship to the chapter
+    chapter_id = Column(String, ForeignKey("chapter.id"))
+    image_url = Column(String, nullable=False)
+    quality = Column(String, nullable=False)  # e.g., "data" or "data-saver"
+
     chapter = relationship("Chapter", back_populates="pages")

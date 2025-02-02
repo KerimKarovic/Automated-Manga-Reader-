@@ -1,3 +1,4 @@
+// frontend/src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 
@@ -21,11 +22,17 @@ const App: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
 
+  // Debug log for initial render
+  console.log("App rendering. Current state:", { mangas, selectedManga, chapters, selectedChapter, imageUrls });
+
   // Fetch available mangas from your backend
   useEffect(() => {
     fetch('http://127.0.0.1:8000/manga')
       .then((res) => res.json())
-      .then((data) => setMangas(data))
+      .then((data) => {
+        console.log("Fetched mangas:", data);
+        setMangas(data);
+      })
       .catch((err) => console.error("Error fetching mangas:", err));
   }, []);
 
@@ -34,7 +41,10 @@ const App: React.FC = () => {
     if (selectedManga) {
       fetch(`http://127.0.0.1:8000/mangadex/${selectedManga.id}/chapters?language=en`)
         .then((res) => res.json())
-        .then((data) => setChapters(data.chapters))
+        .then((data) => {
+          console.log("Fetched chapters:", data);
+          setChapters(data.chapters);
+        })
         .catch((err) => console.error("Error fetching chapters:", err));
     }
   }, [selectedManga]);
@@ -45,6 +55,7 @@ const App: React.FC = () => {
       fetch(`http://127.0.0.1:8000/mangadex/chapter/${selectedChapter.id}/images?quality=data`)
         .then((res) => res.json())
         .then((data) => {
+          console.log("Fetched chapter images:", data);
           setImageUrls(data.image_urls);
           setCurrentPageIndex(0);
         })
@@ -64,18 +75,18 @@ const App: React.FC = () => {
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Manga Reader</Text>
-        <Text style={styles.subtitle}>Select a Manga</Text>
-        {mangas.map((manga) => (
-          <TouchableOpacity
-            key={manga.id}
-            style={styles.button}
-            onPress={() => setSelectedManga(manga)}
-          >
-            <Text style={styles.buttonText}>
-              {manga.title} by {manga.author}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {mangas.length === 0 ? <Text>Loading mangas...</Text> : <Text>Select a Manga</Text>}
+        <ul>
+          {mangas.map((manga) => (
+            <li key={manga.id}>
+              <TouchableOpacity style={styles.button} onPress={() => setSelectedManga(manga)}>
+                <Text style={styles.buttonText}>
+                  {manga.title} by {manga.author}
+                </Text>
+              </TouchableOpacity>
+            </li>
+          ))}
+        </ul>
       </ScrollView>
     );
   }
@@ -87,22 +98,25 @@ const App: React.FC = () => {
         <TouchableOpacity style={styles.backButton} onPress={() => setSelectedManga(null)}>
           <Text style={styles.backButtonText}>Back to Manga List</Text>
         </TouchableOpacity>
-        {chapters.map((chapter) => (
-          <TouchableOpacity
-            key={chapter.id}
-            style={styles.button}
-            onPress={() => setSelectedChapter(chapter)}
-          >
-            <Text style={styles.buttonText}>
-              Chapter {chapter.chapter} {chapter.volume ? `(Volume ${chapter.volume})` : ''}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {chapters.length === 0 ? (
+          <Text>Loading chapters...</Text>
+        ) : (
+          <ul>
+            {chapters.map((chapter) => (
+              <li key={chapter.id}>
+                <TouchableOpacity style={styles.button} onPress={() => setSelectedChapter(chapter)}>
+                  <Text style={styles.buttonText}>
+                    Chapter {chapter.chapter} {chapter.volume ? `(Volume ${chapter.volume})` : ''}
+                  </Text>
+                </TouchableOpacity>
+              </li>
+            ))}
+          </ul>
+        )}
       </ScrollView>
     );
   }
 
-  // When a chapter is selected, display its images with navigation.
   return (
     <View style={styles.container}>
       <Text style={styles.title}>

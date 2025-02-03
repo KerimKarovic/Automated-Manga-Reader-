@@ -6,7 +6,7 @@ interface Manga {
   id: number | string;
   title: string;
   author: string;
-  mangadexId?: string;  // external MangaDex ID
+  mangadexId?: string; // Optional external MangaDex ID.
 }
 
 interface Chapter {
@@ -39,18 +39,23 @@ const App: React.FC = () => {
       .catch((err) => console.error("Error fetching mangas:", err));
   }, []);
 
-  // Fetch chapters for the selected manga using its external mangadexId if available
+  // Fetch chapters for the selected manga
   useEffect(() => {
     if (selectedManga) {
-      // Use mangadexId if available; otherwise fallback to local id
+      // Use mangadexId if available; otherwise, fallback to local id.
       const externalId = selectedManga.mangadexId || selectedManga.id;
       fetch(`${backendUrl}/mangadex/${externalId}/chapters?language=en`)
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched chapters:", data);
-          setChapters(data.chapters);
+          // Use an empty array as fallback if data.chapters is not defined.
+          setChapters(data.chapters || []);
         })
-        .catch((err) => console.error("Error fetching chapters:", err));
+        .catch((err) => {
+          console.error("Error fetching chapters:", err);
+          // Set chapters to an empty array to avoid undefined.
+          setChapters([]);
+        });
     }
   }, [selectedManga]);
 
@@ -61,10 +66,13 @@ const App: React.FC = () => {
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched chapter images:", data);
-          setImageUrls(data.image_urls);
+          setImageUrls(data.image_urls || []);
           setCurrentPageIndex(0);
         })
-        .catch((err) => console.error("Error fetching chapter images:", err));
+        .catch((err) => {
+          console.error("Error fetching chapter images:", err);
+          setImageUrls([]);
+        });
     }
   }, [selectedChapter]);
 
@@ -76,7 +84,7 @@ const App: React.FC = () => {
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  // If no manga is selected, show manga list.
+  // Rendering when no manga is selected
   if (!selectedManga) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -102,7 +110,7 @@ const App: React.FC = () => {
     );
   }
 
-  // If a manga is selected but not a chapter, show chapter list.
+  // Rendering when a manga is selected but no chapter is chosen
   if (selectedManga && !selectedChapter) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -131,7 +139,7 @@ const App: React.FC = () => {
     );
   }
 
-  // When a chapter is selected, display its images with navigation.
+  // Rendering when a chapter is selected: display images with navigation.
   return (
     <View style={styles.container}>
       <Text style={styles.title}>

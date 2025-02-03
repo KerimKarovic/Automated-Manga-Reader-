@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, init_db
 from app.ml.panel_detection import detect_panels
-from app.models import Manga, Chapter, Page  # Note: Chapter and Page models must be added in models.py as shown above
+from app.models import Manga, Chapter, Page  # Make sure these models include the necessary fields.
 from app.tts.tts_engine import speak_text
 from app.api.mangadex_chapters import search_manga_by_title, get_manga_feed, get_chapter_images, construct_image_urls
 import os
@@ -68,7 +68,6 @@ def search_manga(title: str):
     """
     result = search_manga_by_title(title)
     # Return a simplified list of manga IDs and titles from the result.
-    # (Adjust the parsing based on the actual response structure.)
     mangas = [{"id": m["id"], "title": m["attributes"].get("title", {}).get("en", "Unknown")} for m in result.get("data", [])]
     return {"mangas": mangas}
 
@@ -78,7 +77,6 @@ def get_chapters(manga_id: str, language: str = "en"):
     Retrieve the chapter feed for a specific manga, filtered by language.
     """
     result = get_manga_feed(manga_id, translated_languages=[language])
-    # Return a simplified list of chapter IDs.
     chapters = [{"id": c["id"], "chapter": c["attributes"].get("chapter"), "volume": c["attributes"].get("volume")} for c in result.get("data", [])]
     return {"chapters": chapters}
 
@@ -101,10 +99,16 @@ def store_chapter(chapter_id: str, db: Session = Depends(get_db)):
     """
     # Retrieve chapter image metadata from MangaDex
     base_url, chapter_hash, data_files, _ = get_chapter_images(chapter_id)
-    # For demonstration, use fixed values for volume, chapter number, title, and language.
+    
+    # Look up the manga record in our local database using the external MangaDex ID.
+    # For example, for "One-Punch Man", we expect mangadexId to be 'd8a959f7-648e-4c8d-8f23-f1f3f8e129f3'
+    manga_record = db.query(Manga).filter(Manga.mangadexId == 'd8a959f7-648e-4c8d-8f23-f1f3f8e129f3').first()
+    if not manga_record:
+        raise HTTPException(status_code=404, detail="Manga record not found for provided external ID")
+    
     new_chapter = Chapter(
         id=chapter_id,
-        manga_id=1,  # You can update this to link to an existing Manga record.
+        manga_id=manga_record.id,  # Link to the found manga record.
         volume="1",
         chapter_number="1",
         title="Example Chapter",
@@ -114,7 +118,8 @@ def store_chapter(chapter_id: str, db: Session = Depends(get_db)):
     db.add(new_chapter)
     db.commit()
     db.refresh(new_chapter)
-    # Create Page records for each image in original quality
+    
+    # Create Page records for each image in original quality.
     for filename in data_files:
         full_url = f"{base_url}/data/{chapter_hash}/{filename}"
         new_page = Page(

@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 
 interface Manga {
-  id: string;
+  id: number | string;
   title: string;
   author: string;
+  mangadexId?: string;  // external MangaDex ID
 }
 
 interface Chapter {
@@ -13,6 +14,9 @@ interface Chapter {
   chapter: string;
   volume?: string | null;
 }
+
+// Use your computer's IP address so that your mobile device can access the backend.
+const backendUrl = "http://192.168.2.210:8000";
 
 const App: React.FC = () => {
   const [mangas, setMangas] = useState<Manga[]>([]);
@@ -22,12 +26,11 @@ const App: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
 
-  // Debug log for initial render
   console.log("App rendering. Current state:", { mangas, selectedManga, chapters, selectedChapter, imageUrls });
 
   // Fetch available mangas from your backend
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/manga')
+    fetch(`${backendUrl}/manga`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Fetched mangas:", data);
@@ -36,10 +39,12 @@ const App: React.FC = () => {
       .catch((err) => console.error("Error fetching mangas:", err));
   }, []);
 
-  // Fetch chapters for the selected manga
+  // Fetch chapters for the selected manga using its external mangadexId if available
   useEffect(() => {
     if (selectedManga) {
-      fetch(`http://127.0.0.1:8000/mangadex/${selectedManga.id}/chapters?language=en`)
+      // Use mangadexId if available; otherwise fallback to local id
+      const externalId = selectedManga.mangadexId || selectedManga.id;
+      fetch(`${backendUrl}/mangadex/${externalId}/chapters?language=en`)
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched chapters:", data);
@@ -52,7 +57,7 @@ const App: React.FC = () => {
   // Fetch chapter images when a chapter is selected
   useEffect(() => {
     if (selectedChapter) {
-      fetch(`http://127.0.0.1:8000/mangadex/chapter/${selectedChapter.id}/images?quality=data`)
+      fetch(`${backendUrl}/mangadex/chapter/${selectedChapter.id}/images?quality=data`)
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched chapter images:", data);
@@ -71,6 +76,7 @@ const App: React.FC = () => {
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
   };
 
+  // If no manga is selected, show manga list.
   if (!selectedManga) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -96,6 +102,7 @@ const App: React.FC = () => {
     );
   }
 
+  // If a manga is selected but not a chapter, show chapter list.
   if (selectedManga && !selectedChapter) {
     return (
       <ScrollView contentContainerStyle={styles.container}>

@@ -44,7 +44,14 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (selectedManga) {
-      const externalId = selectedManga.mangadexId || selectedManga.id;
+      let externalId: string | number;
+
+      if (selectedManga.title === "Dandadan") {
+        externalId = "68112dc1-2b80-4f20-beb8-2f2a8716a430";
+      } else {
+        externalId = selectedManga.mangadexId || selectedManga.id;
+      }
+
       fetch(`${backendUrl}/mangadex/${externalId}/chapters?language=en`)
         .then((res) => res.json())
         .then((data) => setChapters(data.chapters || []))
@@ -82,27 +89,32 @@ const App: React.FC = () => {
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dy) > 10,
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dy > 30) setFullscreenVisible(false); // swipe down to exit
+        if (gesture.dy > 30) setFullscreenVisible(false);
       },
     })
   ).current;
 
   if (!selectedManga) {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Manga Reader</Text>
-        {mangas.length === 0 ? (
-          <Text>Loading mangas...</Text>
-        ) : (
-          <View style={styles.listContainer}>
-            {mangas.map((manga) => (
-              <TouchableOpacity key={manga.id} style={styles.button} onPress={() => setSelectedManga(manga)}>
-                <Text style={styles.buttonText}>{manga.title} by {manga.author}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+      <View style={[styles.container, { backgroundColor: '#C7E6E7' }]}>        
+        <View style={styles.blob1} />
+        <View style={styles.blob2} />
+        <View style={styles.blob3} />
+        <ScrollView contentContainerStyle={styles.overlayContent}>
+          <Text style={styles.title}>Manga Reader</Text>
+          {mangas.length === 0 ? (
+            <Text>Loading mangas...</Text>
+          ) : (
+            <View style={styles.listContainer}>
+              {mangas.map((manga) => (
+                <TouchableOpacity key={manga.id} style={styles.mangaButton} onPress={() => setSelectedManga(manga)}>
+                  <Text style={styles.mangaButtonText}>{manga.title} by {manga.author}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </ScrollView>
+      </View>
     );
   }
 
@@ -118,8 +130,8 @@ const App: React.FC = () => {
         ) : (
           <View style={styles.listContainer}>
             {chapters.map((chapter) => (
-              <TouchableOpacity key={chapter.id} style={styles.button} onPress={() => setSelectedChapter(chapter)}>
-                <Text style={styles.buttonText}>Chapter {chapter.chapter} {chapter.volume ? `(Vol ${chapter.volume})` : ''}</Text>
+              <TouchableOpacity key={chapter.id} style={styles.mangaButton} onPress={() => setSelectedChapter(chapter)}>
+                <Text style={styles.mangaButtonText}>Chapter {chapter.chapter} {chapter.volume ? `(Vol ${chapter.volume})` : ''}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -172,7 +184,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+  },
+  overlayContent: {
+    width: '100%',
+    alignItems: 'center',
+    paddingTop: 100,
+    zIndex: 1
   },
   title: {
     fontSize: 24,
@@ -182,17 +200,17 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center'
   },
-  button: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 4,
+  mangaButton: {
+    backgroundColor: '#E6F4E1',
+    padding: 12,
+    marginVertical: 6,
+    borderRadius: 20,
     width: '100%',
     alignItems: 'center'
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16
+  mangaButtonText: {
+    fontSize: 16,
+    color: '#000'
   },
   backButton: {
     marginBottom: 20,
@@ -227,6 +245,36 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  blob1: {
+    position: 'absolute',
+    top: -50,
+    left: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: '#BACDE9',
+    opacity: 0.3
+  },
+  blob2: {
+    position: 'absolute',
+    top: 100,
+    right: -40,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: '#E9C2BA',
+    opacity: 0.3
+  },
+  blob3: {
+    position: 'absolute',
+    bottom: -60,
+    left: 50,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#E9BACB',
+    opacity: 0.3
   }
 });
 

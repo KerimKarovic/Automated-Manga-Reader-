@@ -95,40 +95,52 @@ def get_chapter_image_urls(chapter_id: str, quality: str = "data"):
 def store_chapter(chapter_id: str, db: Session = Depends(get_db)):
     """
     Fetch chapter image metadata from MangaDex and store chapter and pages in the database.
-    (For this example, we assume that the chapter metadata includes minimal fields.)
     """
-    # Retrieve chapter image metadata from MangaDex
+    # Fetch image metadata
     base_url, chapter_hash, data_files, _ = get_chapter_images(chapter_id)
-    
-    # Look up the manga record in our local database using the external MangaDex ID.
-    # For example, for "One-Punch Man", we expect mangadexId to be 'd8a959f7-648e-4c8d-8f23-f1f3f8e129f3'
-    manga_record = db.query(Manga).filter(Manga.mangadexId == 'd8a959f7-648e-4c8d-8f23-f1f3f8e129f3').first()
+
+    # Fetch full chapter metadata to get the associated manga_id
+    chapter_metadata = requests.get(f"https://api.mangadex.org/chapter/{chapter_id}").json()
+    relationships = chapter_metadata.get("data", {}).get("relationships", [])
+    manga_rel = next((rel for rel in relationships if rel["type"] == "manga"), None)
+
+    if not manga_rel:
+        raise HTTPException(status_code=404, detail="Manga relationship not found in chapter metadata")
+
+    mangadex_manga_id = manga_rel["id"]
+
+    # Find the manga in the local DB
+    manga_record = db.query(Manga).filter(Manga.mangadexId == mangadex_manga_id).first()
     if not manga_record:
         raise HTTPException(status_code=404, detail="Manga record not found for provided external ID")
-    
+
+    # Check if chapter already exists to avoid duplication
+    existing_chapter = db.query(Chapter).filter(Chapter.id == chapter_id).first()
+    if existing_chapter:
+        return {"message": f"Chapter {chapter_id} already exists in database"}
+
     new_chapter = Chapter(
         id=chapter_id,
-        manga_id=manga_record.id,  # Link to the found manga record.
-        volume="1",
-        chapter_number="1",
-        title="Example Chapter",
-        translated_language="en",
+        manga_id=manga_record.id,
+        volume=chapter_metadata["data"]["attributes"].get("volume", ""),
+        chapter_number=chapter_metadata["data"]["attributes"].get("chapter", ""),
+        title=chapter_metadata["data"]["attributes"].get("title", ""),
+        translated_language=chapter_metadata["data"]["attributes"].get("translatedLanguage", "en"),
         chapter_hash=chapter_hash
     )
     db.add(new_chapter)
     db.commit()
     db.refresh(new_chapter)
-    
-    # Create Page records for each image in original quality.
+
     for filename in data_files:
         full_url = f"{base_url}/data/{chapter_hash}/{filename}"
-        new_page = Page(
+        db.add(Page(
             chapter_id=chapter_id,
             image_url=full_url,
             quality="data"
-        )
-        db.add(new_page)
+        ))
     db.commit()
+
     return {"message": "Chapter and pages stored successfully", "chapter": new_chapter.id}
 
 # Include the MangaDex router in your main app.

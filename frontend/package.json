@@ -10,11 +10,13 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "~52.0.28",
+    "expo": "~52.0.42",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "0.76.6",
-    "react-native-web": "~0.19.13"
+    "react-native": "0.76.9",
+    "react-native-web": "~0.19.13",
+    "@expo/metro-runtime": "~4.0.1",
+    "react-native-gesture-handler": "~2.20.2"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

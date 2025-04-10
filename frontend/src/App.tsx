@@ -1,12 +1,21 @@
-// frontend/src/App.tsx
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Modal,
+  Dimensions,
+  PanResponder
+} from 'react-native';
 
 interface Manga {
   id: number | string;
   title: string;
   author: string;
-  mangadexId?: string; // Optional external MangaDex ID.
+  mangadexId?: string;
 }
 
 interface Chapter {
@@ -15,8 +24,7 @@ interface Chapter {
   volume?: string | null;
 }
 
-// Use your computer's IP address so that your mobile device can access the backend.
-const backendUrl = "http://192.168.2.210:8000";
+const backendUrl = "http://192.168.2.122:8000";
 
 const App: React.FC = () => {
   const [mangas, setMangas] = useState<Manga[]>([]);
@@ -25,47 +33,33 @@ const App: React.FC = () => {
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
+  const [fullscreenVisible, setFullscreenVisible] = useState<boolean>(false);
 
-  console.log("App rendering. Current state:", { mangas, selectedManga, chapters, selectedChapter, imageUrls });
-
-  // Fetch available mangas from your backend
   useEffect(() => {
     fetch(`${backendUrl}/manga`)
       .then((res) => res.json())
-      .then((data) => {
-        console.log("Fetched mangas:", data);
-        setMangas(data);
-      })
+      .then((data) => setMangas(data))
       .catch((err) => console.error("Error fetching mangas:", err));
   }, []);
 
-  // Fetch chapters for the selected manga
   useEffect(() => {
     if (selectedManga) {
-      // Use mangadexId if available; otherwise, fallback to local id.
       const externalId = selectedManga.mangadexId || selectedManga.id;
       fetch(`${backendUrl}/mangadex/${externalId}/chapters?language=en`)
         .then((res) => res.json())
-        .then((data) => {
-          console.log("Fetched chapters:", data);
-          // Use an empty array as fallback if data.chapters is not defined.
-          setChapters(data.chapters || []);
-        })
+        .then((data) => setChapters(data.chapters || []))
         .catch((err) => {
           console.error("Error fetching chapters:", err);
-          // Set chapters to an empty array to avoid undefined.
           setChapters([]);
         });
     }
   }, [selectedManga]);
 
-  // Fetch chapter images when a chapter is selected
   useEffect(() => {
     if (selectedChapter) {
       fetch(`${backendUrl}/mangadex/chapter/${selectedChapter.id}/images?quality=data`)
         .then((res) => res.json())
         .then((data) => {
-          console.log("Fetched chapter images:", data);
           setImageUrls(data.image_urls || []);
           setCurrentPageIndex(0);
         })
@@ -84,7 +78,15 @@ const App: React.FC = () => {
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  // Rendering when no manga is selected
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dy) > 10,
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dy > 30) setFullscreenVisible(false); // swipe down to exit
+      },
+    })
+  ).current;
+
   if (!selectedManga) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -94,14 +96,8 @@ const App: React.FC = () => {
         ) : (
           <View style={styles.listContainer}>
             {mangas.map((manga) => (
-              <TouchableOpacity
-                key={manga.id}
-                style={styles.button}
-                onPress={() => setSelectedManga(manga)}
-              >
-                <Text style={styles.buttonText}>
-                  {manga.title} by {manga.author}
-                </Text>
+              <TouchableOpacity key={manga.id} style={styles.button} onPress={() => setSelectedManga(manga)}>
+                <Text style={styles.buttonText}>{manga.title} by {manga.author}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -110,7 +106,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Rendering when a manga is selected but no chapter is chosen
   if (selectedManga && !selectedChapter) {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -123,14 +118,8 @@ const App: React.FC = () => {
         ) : (
           <View style={styles.listContainer}>
             {chapters.map((chapter) => (
-              <TouchableOpacity
-                key={chapter.id}
-                style={styles.button}
-                onPress={() => setSelectedChapter(chapter)}
-              >
-                <Text style={styles.buttonText}>
-                  Chapter {chapter.chapter} {chapter.volume ? `(Volume ${chapter.volume})` : ''}
-                </Text>
+              <TouchableOpacity key={chapter.id} style={styles.button} onPress={() => setSelectedChapter(chapter)}>
+                <Text style={styles.buttonText}>Chapter {chapter.chapter} {chapter.volume ? `(Vol ${chapter.volume})` : ''}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -139,34 +128,44 @@ const App: React.FC = () => {
     );
   }
 
-  // Rendering when a chapter is selected: display images with navigation.
+  const handlePagePress = (event: any) => {
+    const { locationX } = event.nativeEvent;
+    if (locationX < Dimensions.get('window').width / 2) {
+      prevPage();
+    } else {
+      nextPage();
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        {selectedManga?.title} - Chapter {selectedChapter?.chapter}
-      </Text>
+      <Text style={styles.title}>{selectedManga?.title} - Chapter {selectedChapter?.chapter}</Text>
       <TouchableOpacity style={styles.backButton} onPress={() => setSelectedChapter(null)}>
         <Text style={styles.backButtonText}>Back to Chapters</Text>
       </TouchableOpacity>
+
       {imageUrls.length > 0 ? (
-        <View style={styles.imageContainer}>
-          <TouchableOpacity style={styles.navArea} onPress={prevPage} />
-          <Image
-            source={{ uri: imageUrls[currentPageIndex] }}
-            style={styles.image}
-            resizeMode="contain"
-          />
-          <TouchableOpacity style={styles.navArea} onPress={nextPage} />
-        </View>
+        <TouchableOpacity onPress={() => setFullscreenVisible(true)}>
+          <Image source={{ uri: imageUrls[currentPageIndex] }} style={styles.image} resizeMode="contain" />
+        </TouchableOpacity>
       ) : (
         <Text>Loading chapter images...</Text>
       )}
-      <Text>
-        Page {currentPageIndex + 1} of {imageUrls.length}
-      </Text>
+
+      <Text>Page {currentPageIndex + 1} of {imageUrls.length}</Text>
+
+      <Modal visible={fullscreenVisible} transparent={false} animationType="fade">
+        <View style={styles.fullscreenContainer} {...panResponder.panHandlers}>
+          <TouchableOpacity style={styles.fullscreenOverlay} onPress={handlePagePress}>
+            <Image source={{ uri: imageUrls[currentPageIndex] }} style={styles.fullscreenImage} resizeMode="contain" />
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -177,13 +176,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
-    color: '#333'
-  },
-  subtitle: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: '#555'
+    marginBottom: 20
   },
   listContainer: {
     width: '100%',
@@ -208,23 +201,32 @@ const styles = StyleSheet.create({
     borderRadius: 4
   },
   backButtonText: {
-    fontSize: 16,
-    color: '#333'
-  },
-  imageContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20
-  },
-  navArea: {
-    flex: 1
+    fontSize: 16
   },
   image: {
-    width: '80%',
-    height: 300,
+    width: width * 0.8,
+    height: height * 0.6,
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 4
+    borderRadius: 4,
+    marginBottom: 10
+  },
+  fullscreenContainer: {
+    flex: 1,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%'
+  },
+  fullscreenOverlay: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 });
 

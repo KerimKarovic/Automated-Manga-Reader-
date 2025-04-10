@@ -10,6 +10,9 @@ class Manga(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     author = Column(String, index=True)
+    # New column for the external MangaDex ID.
+    mangadexId = Column(String, nullable=True)
+    
     # Relationship: one manga can have many chapters.
     chapters = relationship("Chapter", back_populates="manga")
 

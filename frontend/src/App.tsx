@@ -1,3 +1,5 @@
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
@@ -6,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Button,
   Modal,
   Dimensions,
   PanResponder
@@ -34,6 +37,7 @@ const App: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
   const [fullscreenVisible, setFullscreenVisible] = useState<boolean>(false);
+  const [audioSource, setAudioSource] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${backendUrl}/manga`)
@@ -77,6 +81,80 @@ const App: React.FC = () => {
     }
   }, [selectedChapter]);
 
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+    });
+  }, []);
+  
+
+  const testWavAudio = async () => {
+    console.log("🔊 Starting WAV audio test...");
+  
+    const remoteUri = 'https://file-examples.com/storage/fe0ff623e9b3dbb92bfa60d/2017/11/file_example_WAV_1MG.wav';
+    const localUri = FileSystem.cacheDirectory + 'test.wav';
+  
+    try {
+      const download = await FileSystem.downloadAsync(remoteUri, localUri);
+      console.log("✅ File downloaded to:", download.uri);
+  
+      const { sound } = await Audio.Sound.createAsync({ uri: download.uri });
+      console.log("🔊 Playing downloaded WAV...");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("❌ Failed to play WAV:", error);
+    }
+  };
+  
+
+
+  const handleReadPress = async () => {
+    if (!selectedChapter) return;
+  
+    try {
+      const uri = `${backendUrl}/tts/${selectedChapter.id}`;
+      const localUri = `${FileSystem.cacheDirectory}tts_${selectedChapter.id}.wav`;
+  
+      // ✅ this is where we download the audio file from backend
+      const downloadRes = await FileSystem.downloadAsync(uri, localUri);
+  
+      // ✅ now we can safely use it for debugging
+      console.log("Downloading from:", uri);
+      console.log("Saved to:", downloadRes.uri);
+  
+      setAudioSource(downloadRes.uri);
+    } catch (error) {
+      console.error("Error fetching TTS audio:", error);
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    let sound: Audio.Sound;
+
+    const loadAndPlayAudio = async () => {
+      if (audioSource) {
+        try {
+          sound = new Audio.Sound();
+          await sound.loadAsync({ uri: audioSource });
+          await sound.playAsync();
+        } catch (err) {
+          console.error("Failed to load/play audio", err);
+        }
+      }
+    };
+
+    loadAndPlayAudio();
+
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [audioSource]);
+
   const nextPage = () => {
     setCurrentPageIndex((prev) => Math.min(prev + 1, imageUrls.length - 1));
   };
@@ -93,6 +171,15 @@ const App: React.FC = () => {
       },
     })
   ).current;
+
+  const handlePagePress = (event: any) => {
+    const { locationX } = event.nativeEvent;
+    if (locationX < Dimensions.get('window').width / 2) {
+      prevPage();
+    } else {
+      nextPage();
+    }
+  };
 
   if (!selectedManga) {
     return (
@@ -113,6 +200,7 @@ const App: React.FC = () => {
               ))}
             </View>
           )}
+          
         </ScrollView>
       </View>
     );
@@ -122,6 +210,13 @@ const App: React.FC = () => {
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{selectedManga.title} - Chapters</Text>
+        <View style={{ padding: 20 }}>
+  <Button title="🔊 Test WAV Audio" onPress={() => {
+    console.log("WAV Test Pressed");
+    testWavAudio();
+  }} />
+</View>
+
         <TouchableOpacity style={styles.backButton} onPress={() => setSelectedManga(null)}>
           <Text style={styles.backButtonText}>Back to Manga List</Text>
         </TouchableOpacity>
@@ -140,21 +235,14 @@ const App: React.FC = () => {
     );
   }
 
-  const handlePagePress = (event: any) => {
-    const { locationX } = event.nativeEvent;
-    if (locationX < Dimensions.get('window').width / 2) {
-      prevPage();
-    } else {
-      nextPage();
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{selectedManga?.title} - Chapter {selectedChapter?.chapter}</Text>
       <TouchableOpacity style={styles.backButton} onPress={() => setSelectedChapter(null)}>
         <Text style={styles.backButtonText}>Back to Chapters</Text>
       </TouchableOpacity>
+      
+
 
       {imageUrls.length > 0 ? (
         <TouchableOpacity onPress={() => setFullscreenVisible(true)}>
@@ -170,6 +258,9 @@ const App: React.FC = () => {
         <View style={styles.fullscreenContainer} {...panResponder.panHandlers}>
           <TouchableOpacity style={styles.fullscreenOverlay} onPress={handlePagePress}>
             <Image source={{ uri: imageUrls[currentPageIndex] }} style={styles.fullscreenImage} resizeMode="contain" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.readButton} onPress={handleReadPress}>
+            <Text style={styles.readButtonText}>Read</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -220,6 +311,18 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16
+  },
+  readButton: {
+    marginTop: 20,
+    padding: 12,
+    backgroundColor: '#6CB4EE',
+    borderRadius: 12,
+    alignSelf: 'center'
+  },
+  readButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
   },
   image: {
     width: width * 0.8,

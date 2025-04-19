@@ -39,5 +39,6 @@ class Page(Base):
     chapter_id = Column(String, ForeignKey("chapter.id"))
     image_url = Column(String, nullable=False)
     quality = Column(String, nullable=False)  # e.g., "data" or "data-saver"
+    page_number = Column(Integer)
 
     chapter = relationship("Chapter", back_populates="pages")

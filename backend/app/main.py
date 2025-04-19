@@ -1,14 +1,16 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from app.database import SessionLocal, init_db
+from app.database import init_db, get_db
 from app.ml.panel_detection import detect_panels
 from app.models import Manga, Chapter, Page  # Make sure these models include the necessary fields.
-from app.tts.tts_engine import speak_text
 from app.api.mangadex_chapters import search_manga_by_title, get_manga_feed, get_chapter_images, construct_image_urls
+from app.api.tts_api import router as tts_router  
+from typing import Optional
+import requests
 import os
 import uuid
 
-# Initialize the database (create tables if they don't exist)
+# Initilize the database (create tables if they don't exist)
 init_db()
 
 # Create the FastAPI app instance.
@@ -32,22 +34,13 @@ async def upload_page(file: UploadFile = File(...)):
         "panels": panels
     }
 
-@app.post("/tts")
-def read_text_aloud_endpoint(text: str):
-    speak_text(text)
-    return {"message": f"Reading text: {text}"}
 
-# Dependency for obtaining a database session.
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
+
 
 @app.post("/manga")
-def create_manga(title: str, author: str, db: Session = Depends(get_db)):
-    new_manga = Manga(title=title, author=author)
+def create_manga(title: str, author: str, mangadex_id: Optional[str] = None, db: Session = Depends(get_db)):
+    new_manga = Manga(title=title, author=author, mangadexId = mangadex_id)
     db.add(new_manga)
     db.commit()
     db.refresh(new_manga)
@@ -132,16 +125,20 @@ def store_chapter(chapter_id: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_chapter)
 
-    for filename in data_files:
+    for index, filename in enumerate(data_files):
         full_url = f"{base_url}/data/{chapter_hash}/{filename}"
         db.add(Page(
             chapter_id=chapter_id,
             image_url=full_url,
-            quality="data"
+            quality="data",
+            page_number=index + 1  # ✅ Add page number
         ))
+
     db.commit()
 
     return {"message": "Chapter and pages stored successfully", "chapter": new_chapter.id}
 
 # Include the MangaDex router in your main app.
 app.include_router(mangadex_router)
+app.include_router(tts_router)  
+

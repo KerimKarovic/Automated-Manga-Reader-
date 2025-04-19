@@ -19,6 +19,13 @@ Base = declarative_base()
 # Helper function to initialize the database.
 def init_db():
     # Import all modules that define models so that they are registered with Base.
-    import app.models  # Ensure that models.py is in the same package.
+    from app.models import Manga, Chapter, Page # Ensure that models.py is in the same package.
     # Create all tables in the database.
     Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

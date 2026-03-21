@@ -44,6 +44,7 @@ const App: React.FC = () => {
     const loadChapters = async () => {
       if (!selectedManga?.mangadex_id) {
         setChapters([]);
+        setLoadingChapters(false);
         return;
       }
       try {
@@ -95,6 +96,10 @@ const App: React.FC = () => {
     try {
       await api.storeChapter(chapter.id);
       const chapterPages = await api.getChapterPages(chapter.id);
+      if (chapterPages.length === 0) {
+        Alert.alert('No pages', 'This chapter has no pages available yet.');
+        return;
+      }
       setSelectedChapter(chapter);
       setPages(chapterPages);
       setCurrentPageIndex(0);
@@ -145,6 +150,7 @@ const App: React.FC = () => {
         selectedManga={selectedManga}
         chapters={chapters}
         loadingChapters={loadingChapters}
+        hasMangaDexId={Boolean(selectedManga.mangadex_id)}
         onBack={() => setSelectedManga(null)}
         onSelectChapter={handleSelectChapter}
       />

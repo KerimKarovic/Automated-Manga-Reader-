@@ -40,7 +40,7 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({
           <Image source={{ uri: currentPage.image_url }} style={styles.image} resizeMode="contain" />
         </TouchableOpacity>
       ) : (
-        <Text style={styles.loading}>Loading pages...</Text>
+        <Text style={styles.loading}>No pages available for this chapter yet.</Text>
       )}
 
       <Text style={styles.pageLabel}>

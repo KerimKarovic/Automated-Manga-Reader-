@@ -44,6 +44,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           </TouchableOpacity>
         </View>
         {loadingSearch ? <ActivityIndicator size="small" color="#1f7a8c" /> : null}
+        {!loadingSearch && searchQuery.trim().length > 0 && searchResults.length === 0 ? (
+          <Text style={styles.emptyText}>No MangaDex matches found.</Text>
+        ) : null}
 
         {searchResults.map((item) => (
           <View key={item.id} style={styles.card}>
@@ -59,6 +62,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Local Library</Text>
         {loadingManga ? <ActivityIndicator size="small" color="#1f7a8c" /> : null}
+        {!loadingManga && mangas.length === 0 ? (
+          <Text style={styles.emptyText}>No local manga yet. Search and import one above.</Text>
+        ) : null}
         {mangas.map((manga) => (
           <TouchableOpacity key={manga.id} style={styles.mangaButton} onPress={() => onSelectLocalManga(manga)}>
             <Text style={styles.mangaButtonText}>{manga.title}</Text>
@@ -157,6 +163,9 @@ const styles = StyleSheet.create({
   mangaMeta: {
     color: '#486581',
     marginTop: 2,
+  },
+  emptyText: {
+    color: '#627d98',
   },
 });
 

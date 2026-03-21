@@ -7,6 +7,7 @@ interface ChapterListScreenProps {
   selectedManga: Manga;
   chapters: MangaDexChapter[];
   loadingChapters: boolean;
+  hasMangaDexId: boolean;
   onBack: () => void;
   onSelectChapter: (chapter: MangaDexChapter) => void;
 }
@@ -15,6 +16,7 @@ const ChapterListScreen: React.FC<ChapterListScreenProps> = ({
   selectedManga,
   chapters,
   loadingChapters,
+  hasMangaDexId,
   onBack,
   onSelectChapter,
 }) => {
@@ -28,6 +30,12 @@ const ChapterListScreen: React.FC<ChapterListScreenProps> = ({
       <Text style={styles.subtitle}>Chapters</Text>
 
       {loadingChapters ? <ActivityIndicator size="small" color="#1f7a8c" /> : null}
+      {!loadingChapters && !hasMangaDexId ? (
+        <Text style={styles.emptyText}>This local manga is not linked to a MangaDex ID yet.</Text>
+      ) : null}
+      {!loadingChapters && hasMangaDexId && chapters.length === 0 ? (
+        <Text style={styles.emptyText}>No chapters found for the selected language.</Text>
+      ) : null}
 
       <View style={styles.list}>
         {chapters.map((chapter) => (
@@ -89,6 +97,9 @@ const styles = StyleSheet.create({
   chapterSub: {
     color: '#486581',
     marginTop: 4,
+  },
+  emptyText: {
+    color: '#627d98',
   },
 });
 

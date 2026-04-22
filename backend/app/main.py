@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.analysis import router as analysis_router
 from app.api.routes.audio import router as audio_router
@@ -48,10 +47,6 @@ def on_startup() -> None:
 def read_root() -> dict[str, str]:
     return {"message": "Automated Manga Reader API is running"}
 
-
-# Mount audio storage as static files for serving MP3s
-audio_path = ensure_dir(settings.audio_cache_dir)
-app.mount("/audio", StaticFiles(directory=str(audio_path)), name="audio")
 
 app.include_router(health_router)
 app.include_router(manga_router)

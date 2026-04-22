@@ -175,7 +175,7 @@ class AudioGenerateResponse(BaseModel):
     status: str
     voice: str
     text_length: int
-    file_path: str
+    audio_url: str
     cached: bool
     error_message: str | None = None
 
@@ -188,4 +188,4 @@ class AudioStatusResponse(BaseModel):
     text_length: int
     generated: bool
     cached: bool
-    file_path: str | None = None
+    audio_url: str | None = None

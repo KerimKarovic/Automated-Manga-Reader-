@@ -48,7 +48,7 @@ export interface AudioGenerateResponse {
   status: string;
   voice: string;
   text_length: number;
-  file_path: string;
+  audio_url: string;
   cached: boolean;
   error_message: string | null;
 }
@@ -61,7 +61,7 @@ export interface AudioStatusResponse {
   text_length: number;
   generated: boolean;
   cached: boolean;
-  file_path: string | null;
+  audio_url: string | null;
 }
 
 export interface OcrPageResult {

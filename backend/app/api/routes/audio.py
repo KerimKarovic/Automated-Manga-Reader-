@@ -12,14 +12,14 @@ router = APIRouter(prefix="/audio", tags=["audio"])
 
 
 @router.post("/chapter/{chapter_id}/generate", response_model=AudioGenerateResponse)
-def generate_chapter_audio(chapter_id: str, db: Session = Depends(get_db)) -> AudioGenerateResponse:
+async def generate_chapter_audio(chapter_id: str, db: Session = Depends(get_db)) -> AudioGenerateResponse:
     chapter = chapter_service.get_chapter(chapter_id=chapter_id, db=db)
     if not chapter:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail={"message": "Chapter not found"})
 
     chapter_text = ocr_service.get_chapter_combined_text(chapter_id=chapter_id, db=db)
-    result = tts_service.generate_chapter_audio(chapter_id=chapter_id, chapter_text=chapter_text)
+    result = await tts_service.generate_chapter_audio(chapter_id=chapter_id, chapter_text=chapter_text)
     return AudioGenerateResponse(**result)
 
 

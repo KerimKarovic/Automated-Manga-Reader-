@@ -6,7 +6,7 @@ const EXPLICIT_API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
 function resolveDefaultApiBaseUrl(): string {
   // Web runs in the same machine browser, so localhost is the safest default.
   if (Platform.OS === 'web') {
-    return 'http://127.0.0.1:8000';
+    return 'http://127.0.0.1:8001';
   }
 
   // In Expo Go, derive the dev machine host from Metro metadata.
@@ -18,12 +18,12 @@ function resolveDefaultApiBaseUrl(): string {
   if (typeof hostUri === 'string' && hostUri.length > 0) {
     const host = hostUri.split(':')[0];
     if (host) {
-      return `http://${host}:8000`;
+      return `http://${host}:8001`;
     }
   }
 
   // Fallback for simulators / local development.
-  return 'http://127.0.0.1:8000';
+  return 'http://127.0.0.1:8001';
 }
 
 export const API_BASE_URL = EXPLICIT_API_BASE_URL || resolveDefaultApiBaseUrl();

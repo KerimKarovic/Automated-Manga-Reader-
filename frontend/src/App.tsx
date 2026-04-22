@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
+import { Audio } from 'expo-av';
 
 import FullscreenReader from './components/FullscreenReader';
 import ChapterListScreen from './screens/ChapterListScreen';
@@ -7,6 +8,7 @@ import HomeScreen from './screens/HomeScreen';
 import ReaderScreen from './screens/ReaderScreen';
 import { api } from './services/api';
 import { Manga, MangaDexChapter, MangaDexManga, OcrChapterResult, Page } from './types';
+import { API_BASE_URL } from './config/api';
 
 const OCR_DEPENDENCY_MESSAGE = 'OCR cannot run because Tesseract OCR is not installed/configured on the backend.';
 
@@ -53,6 +55,8 @@ const App: React.FC = () => {
   const [runningOcr, setRunningOcr] = useState<boolean>(false);
   const [ocrStatus, setOcrStatus] = useState<OcrChapterResult | null>(null);
   const [ocrNotice, setOcrNotice] = useState<string | null>(null);
+  const [playingAudio, setPlayingAudio] = useState<boolean>(false);
+  const [audioPlayer, setAudioPlayer] = useState<Audio.Sound | null>(null);
 
   const currentPage = useMemo(() => pages[currentPageIndex], [pages, currentPageIndex]);
 
@@ -146,34 +150,111 @@ const App: React.FC = () => {
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
   };
 
+  const stopAudio = async () => {
+    if (audioPlayer) {
+      try {
+        await audioPlayer.stopAsync();
+        await audioPlayer.unloadAsync();
+      } catch (error) {
+        console.error('Error stopping audio:', error);
+      }
+    }
+    setAudioPlayer(null);
+    setPlayingAudio(false);
+  };
+
   const handleAudioPress = async () => {
     if (!selectedChapter) {
       return;
     }
+
+    // If audio is already playing, stop it
+    if (playingAudio && audioPlayer) {
+      await stopAudio();
+      return;
+    }
+
     try {
+      setPlayingAudio(true);
+
+      // Get current audio status
       const audioStatus = await api.getChapterAudioStatus(selectedChapter.id);
-      
+
+      // If OCR text is unavailable, show error
       if (audioStatus.status === 'unavailable') {
+        setPlayingAudio(false);
         Alert.alert('Audio Not Available', audioStatus.message);
         return;
       }
 
+      // If audio hasn't been generated yet, generate it first
       if (!audioStatus.generated) {
-        Alert.alert('Audio', 'Generating audio... this may take a moment.');
-        const generated = await api.generateChapterAudio(selectedChapter.id);
-        Alert.alert('Audio', `Audio generated successfully! Cached: ${generated.cached}`);
-        return;
+        Alert.alert('Generating Audio', 'Creating MP3 from text... this may take a moment.');
+        try {
+          const generated = await api.generateChapterAudio(selectedChapter.id);
+          Alert.alert('Audio Generated', `Ready to play. (Cached: ${generated.cached})`);
+          // Update status for URL
+          const updatedStatus = await api.getChapterAudioStatus(selectedChapter.id);
+          if (!updatedStatus.audio_url) {
+            setPlayingAudio(false);
+            Alert.alert('Error', 'Generated audio URL is missing');
+            return;
+          }
+          await playAudio(updatedStatus.audio_url);
+        } catch (generateError) {
+          const message = generateError instanceof Error ? generateError.message : String(generateError);
+          if (message.includes('not installed') || message.includes('not available')) {
+            Alert.alert('TTS Not Available', message);
+          } else if (message.includes('OCR text')) {
+            Alert.alert('No Text to Convert', message);
+          } else {
+            Alert.alert('Generation Failed', message);
+          }
+          setPlayingAudio(false);
+          return;
+        }
+      } else if (audioStatus.audio_url) {
+        // Audio already generated, play it
+        await playAudio(audioStatus.audio_url);
+      } else {
+        setPlayingAudio(false);
+        Alert.alert('Error', 'Audio URL is missing');
       }
-
-      if (audioStatus.generated && audioStatus.file_path) {
-        Alert.alert('Audio', `Playing audio from: ${audioStatus.file_path}. Integration with expo-av can be added here.`);
-        return;
-      }
-
-      Alert.alert('Audio', audioStatus.message);
     } catch (error) {
+      setPlayingAudio(false);
       const message = error instanceof Error ? error.message : String(error);
       Alert.alert('Audio Error', message);
+    }
+  };
+
+  const playAudio = async (audioUrl: string) => {
+    try {
+      // Stop any currently playing audio
+      if (audioPlayer) {
+        await audioPlayer.stopAsync();
+        await audioPlayer.unloadAsync();
+      }
+
+      // Construct full URL if relative
+      const fullUrl = audioUrl.startsWith('http') ? audioUrl : `${API_BASE_URL}${audioUrl}`;
+
+      const sound = new Audio.Sound();
+      
+      // Set up callback for when playback finishes
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          setPlayingAudio(false);
+          setAudioPlayer(null);
+        }
+      });
+
+      await sound.loadAsync({ uri: fullUrl });
+      await sound.playAsync();
+      setAudioPlayer(sound);
+    } catch (error) {
+      setPlayingAudio(false);
+      const message = error instanceof Error ? error.message : String(error);
+      Alert.alert('Playback Error', `Failed to play audio: ${message}`);
     }
   };
 
@@ -255,6 +336,7 @@ const App: React.FC = () => {
           setCurrentPageIndex(0);
           setOcrStatus(null);
           setOcrNotice(null);
+          stopAudio();
         }}
         onRunChapterOcr={handleRunChapterOcr}
         onOpenFullscreen={() => setFullscreenVisible(true)}

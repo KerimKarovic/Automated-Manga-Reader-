@@ -151,10 +151,29 @@ const App: React.FC = () => {
       return;
     }
     try {
-      const response = await api.getAudioStatus(selectedChapter.id);
-      Alert.alert('Audio', response.message);
+      const audioStatus = await api.getChapterAudioStatus(selectedChapter.id);
+      
+      if (audioStatus.status === 'unavailable') {
+        Alert.alert('Audio Not Available', audioStatus.message);
+        return;
+      }
+
+      if (!audioStatus.generated) {
+        Alert.alert('Audio', 'Generating audio... this may take a moment.');
+        const generated = await api.generateChapterAudio(selectedChapter.id);
+        Alert.alert('Audio', `Audio generated successfully! Cached: ${generated.cached}`);
+        return;
+      }
+
+      if (audioStatus.generated && audioStatus.file_path) {
+        Alert.alert('Audio', `Playing audio from: ${audioStatus.file_path}. Integration with expo-av can be added here.`);
+        return;
+      }
+
+      Alert.alert('Audio', audioStatus.message);
     } catch (error) {
-      Alert.alert('Audio', `Unable to check audio status: ${String(error)}`);
+      const message = error instanceof Error ? error.message : String(error);
+      Alert.alert('Audio Error', message);
     }
   };
 

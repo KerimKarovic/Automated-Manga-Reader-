@@ -161,3 +161,31 @@ class OcrChapterResultResponse(BaseModel):
     chapter_text: str
     chapter_text_length: int
     page_results: list[OcrPageResult]
+
+
+class TtsHealthResponse(BaseModel):
+    tts_available: bool
+    engine_name: str
+    default_voice: str
+    error_message: str | None = None
+
+
+class AudioGenerateResponse(BaseModel):
+    chapter_id: str
+    status: str
+    voice: str
+    text_length: int
+    file_path: str
+    cached: bool
+    error_message: str | None = None
+
+
+class AudioStatusResponse(BaseModel):
+    chapter_id: str
+    status: str
+    message: str
+    voice: str
+    text_length: int
+    generated: bool
+    cached: bool
+    file_path: str | None = None

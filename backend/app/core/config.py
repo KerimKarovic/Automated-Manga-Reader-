@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     page_cache_dir: str = "./storage/pages"
     ocr_engine_name: str = "pytesseract"
     tesseract_cmd: str | None = None
+    tts_engine_name: str = "edge-tts"
+    tts_default_voice: str = "en-US-AriaNeural"
+    audio_cache_dir: str = "./storage/audio"
 
     model_config = SettingsConfigDict(
         env_file=".env",

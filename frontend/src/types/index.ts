@@ -43,6 +43,27 @@ export interface AudioStatus {
   chapter_text_length: number;
 }
 
+export interface AudioGenerateResponse {
+  chapter_id: string;
+  status: string;
+  voice: string;
+  text_length: number;
+  file_path: string;
+  cached: boolean;
+  error_message: string | null;
+}
+
+export interface AudioStatusResponse {
+  chapter_id: string;
+  status: string;
+  message: string;
+  voice: string;
+  text_length: number;
+  generated: boolean;
+  cached: boolean;
+  file_path: string | null;
+}
+
 export interface OcrPageResult {
   page_id: number;
   page_number: number;

@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '../config/api';
-import { AudioStatus, Manga, MangaDexChapter, MangaDexManga, OcrChapterResult, OcrChapterRunResponse, Page } from '../types';
+import { AudioGenerateResponse, AudioStatusResponse, Manga, MangaDexChapter, MangaDexManga, OcrChapterResult, OcrChapterRunResponse, Page } from '../types';
 
 function extractApiErrorMessage(detail: unknown): string {
   if (typeof detail === 'string' && detail.trim()) {
@@ -69,8 +69,12 @@ export const api = {
     ),
   getChapterPages: (chapterId: string) =>
     request<Page[]>(`/chapters/${encodeURIComponent(chapterId)}/pages`),
-  getAudioStatus: (chapterId: string) =>
-    request<AudioStatus>(`/audio/chapter/${encodeURIComponent(chapterId)}`),
+  generateChapterAudio: (chapterId: string) =>
+    request<AudioGenerateResponse>(`/audio/chapter/${encodeURIComponent(chapterId)}/generate`, {
+      method: 'POST',
+    }),
+  getChapterAudioStatus: (chapterId: string) =>
+    request<AudioStatusResponse>(`/audio/chapter/${encodeURIComponent(chapterId)}`),
   runChapterOcr: (chapterId: string) =>
     request<OcrChapterRunResponse>(`/ocr/chapter/${encodeURIComponent(chapterId)}`, {
       method: 'POST',

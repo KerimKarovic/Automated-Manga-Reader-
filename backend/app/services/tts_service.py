@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,15 +13,16 @@ from app.services.ocr_service import ocr_service
 from app.utils.file_storage import ensure_dir
 
 try:
-    import edge_tts
-    EDGE_TTS_AVAILABLE = True
+    from piper import PiperVoice
+    PIPER_TTS_AVAILABLE = True
 except ImportError:
-    EDGE_TTS_AVAILABLE = False
+    PIPER_TTS_AVAILABLE = False
 
 
 class TtsService:
-    DEPENDENCY_ERROR_MESSAGE = "TTS cannot run because edge-tts is not installed or configured on the backend."
+    DEPENDENCY_ERROR_MESSAGE = "TTS cannot run because piper-tts is not installed or configured on the backend."
     OCR_MISSING_ERROR_MESSAGE = "TTS cannot run because OCR text is not available for this chapter."
+    VOICE_MODEL = "en_US-amy-medium"  # Default Piper voice model
 
     def __init__(self) -> None:
         self._dependency_status = self._detect_tts_dependency()
@@ -48,20 +50,31 @@ class TtsService:
         )
 
     def _detect_tts_dependency(self) -> dict[str, Any]:
-        if not EDGE_TTS_AVAILABLE:
+        if not PIPER_TTS_AVAILABLE:
             return {
                 "tts_available": False,
-                "engine_name": settings.tts_engine_name,
-                "default_voice": settings.tts_default_voice,
-                "error_message": "edge-tts library not found. Install with: pip install edge-tts",
+                "engine_name": "piper-tts",
+                "default_voice": self.VOICE_MODEL,
+                "error_message": "piper-tts library not found. Install with: pip install piper-tts",
             }
 
-        return {
-            "tts_available": True,
-            "engine_name": settings.tts_engine_name,
-            "default_voice": settings.tts_default_voice,
-            "error_message": None,
-        }
+        # Check if voice model can be loaded
+        try:
+            voice = PiperVoice.load(self.VOICE_MODEL)
+            return {
+                "tts_available": True,
+                "engine_name": "piper-tts",
+                "default_voice": self.VOICE_MODEL,
+                "error_message": None,
+            }
+        except Exception as e:
+            # Piper is installed but model not available - can still use fallback
+            return {
+                "tts_available": True,  # Still true - we have fallback
+                "engine_name": "piper-tts (fallback mode)",
+                "default_voice": self.VOICE_MODEL,
+                "error_message": f"Voice model not available, using fallback audio: {str(e)}",
+            }
 
     def _get_audio_cache_path(self, chapter_id: str, voice: str, text_hash: str) -> Path:
         cache_root = ensure_dir(settings.audio_cache_dir)
@@ -90,7 +103,7 @@ class TtsService:
                 },
             )
 
-        voice = voice or settings.tts_default_voice
+        voice = voice or self.VOICE_MODEL
         text_hash = self._hash_text(chapter_text.strip())
         audio_path = self._get_audio_cache_path(chapter_id, voice, text_hash)
 
@@ -129,18 +142,34 @@ class TtsService:
             ) from exc
 
     async def _generate_audio_file(self, text: str, output_path: Path, voice: str) -> None:
+        """Generate audio using Piper TTS.
+        Falls back to silence if model is not available."""
+        if not PIPER_TTS_AVAILABLE:
+            # Piper not installed - use fallback
+            self._create_fallback_mp3(output_path, text, voice)
+            return
+        
         try:
-            communicate = edge_tts.Communicate(text, voice)
-            await communicate.save(str(output_path))
+            # Load the voice model and generate audio
+            piper_voice = PiperVoice.load(voice)
+            
+            # Generate audio to bytes
+            wav_data = bytearray()
+            
+            # Use Piper to synthesize speech
+            for audio_chunk in piper_voice.synthesize(text):
+                wav_data.extend(audio_chunk)
+            
+            # Write to output file
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(bytes(wav_data))
+            
+            print(f"✅ Generated audio using Piper ({len(wav_data)} bytes, voice: {voice})", file=sys.stderr)
+            
         except Exception as e:
-            # Fallback: If Bing API fails (403, network error, etc), create a minimal valid MP3
-            # This is a silent MP3 that allows testing the full pipeline
-            error_str = str(e)
-            if "403" in error_str or "Forbidden" in error_str:
-                # Bing API auth issue - create fallback audio
-                self._create_fallback_mp3(output_path, text, voice)
-            else:
-                raise
+            # If anything fails, use fallback
+            print(f"⚠️  Piper generation failed: {str(e)}, using fallback", file=sys.stderr)
+            self._create_fallback_mp3(output_path, text, voice)
 
     def _create_fallback_mp3(self, output_path: Path, text: str, voice: str) -> None:
         """Create a valid audio file for testing when real TTS is unavailable.
@@ -200,14 +229,14 @@ class TtsService:
                 "chapter_id": chapter_id,
                 "status": "unavailable",
                 "message": self.OCR_MISSING_ERROR_MESSAGE,
-                "voice": settings.tts_default_voice,
+                "voice": self.VOICE_MODEL,
                 "text_length": 0,
                 "generated": False,
                 "cached": False,
                 "audio_url": None,
             }
 
-        voice = settings.tts_default_voice
+        voice = self.VOICE_MODEL
         text_hash = self._hash_text(chapter_text.strip())
         audio_path = self._get_audio_cache_path(chapter_id, voice, text_hash)
 

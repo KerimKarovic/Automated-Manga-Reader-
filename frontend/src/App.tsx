@@ -6,7 +6,36 @@ import ChapterListScreen from './screens/ChapterListScreen';
 import HomeScreen from './screens/HomeScreen';
 import ReaderScreen from './screens/ReaderScreen';
 import { api } from './services/api';
-import { Manga, MangaDexChapter, MangaDexManga, Page } from './types';
+import { Manga, MangaDexChapter, MangaDexManga, OcrChapterResult, Page } from './types';
+
+const OCR_DEPENDENCY_MESSAGE = 'OCR cannot run because Tesseract OCR is not installed/configured on the backend.';
+
+function isDependencyErrorMessage(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return normalized.includes('tesseract') && (normalized.includes('not installed') || normalized.includes('path'));
+}
+
+function getOcrDependencyNotice(ocrStatus: OcrChapterResult | null): string | null {
+  if (!ocrStatus || ocrStatus.completed_count > 0 || ocrStatus.failed_count === 0) {
+    return null;
+  }
+
+  const failedMessages = ocrStatus.page_results
+    .filter((pageResult) => pageResult.status === 'failed' && typeof pageResult.error_message === 'string')
+    .map((pageResult) => pageResult.error_message?.trim() || '')
+    .filter(Boolean);
+
+  if (failedMessages.length === 0) {
+    return null;
+  }
+
+  const uniqueMessages = Array.from(new Set(failedMessages));
+  if (uniqueMessages.length !== 1 || !isDependencyErrorMessage(uniqueMessages[0])) {
+    return null;
+  }
+
+  return OCR_DEPENDENCY_MESSAGE;
+}
 
 const App: React.FC = () => {
   const [mangas, setMangas] = useState<Manga[]>([]);
@@ -21,6 +50,9 @@ const App: React.FC = () => {
   const [loadingManga, setLoadingManga] = useState<boolean>(false);
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
   const [loadingChapters, setLoadingChapters] = useState<boolean>(false);
+  const [runningOcr, setRunningOcr] = useState<boolean>(false);
+  const [ocrStatus, setOcrStatus] = useState<OcrChapterResult | null>(null);
+  const [ocrNotice, setOcrNotice] = useState<string | null>(null);
 
   const currentPage = useMemo(() => pages[currentPageIndex], [pages, currentPageIndex]);
 
@@ -98,6 +130,9 @@ const App: React.FC = () => {
       setSelectedChapter(chapter);
       setPages(chapterPages);
       setCurrentPageIndex(0);
+      const initialOcrStatus = await api.getChapterOcr(chapter.id);
+      setOcrStatus(initialOcrStatus);
+      setOcrNotice(getOcrDependencyNotice(initialOcrStatus));
     } catch (error) {
       Alert.alert('Error', `Failed to open chapter: ${String(error)}`);
     }
@@ -122,6 +157,41 @@ const App: React.FC = () => {
       Alert.alert('Audio', `Unable to check audio status: ${String(error)}`);
     }
   };
+
+  const handleRunChapterOcr = async () => {
+    if (!selectedChapter) {
+      return;
+    }
+    try {
+      setRunningOcr(true);
+      setOcrNotice(null);
+      const runSummary = await api.runChapterOcr(selectedChapter.id);
+      const latestStatus = await api.getChapterOcr(selectedChapter.id);
+      setOcrStatus(latestStatus);
+      setOcrNotice(getOcrDependencyNotice(latestStatus));
+      Alert.alert(
+        'OCR Complete',
+        `Processed ${runSummary.pages_processed} pages. Success: ${runSummary.success_count}, Failed: ${runSummary.failure_count}.`
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const dependencyNotice = isDependencyErrorMessage(message) || message === OCR_DEPENDENCY_MESSAGE
+        ? OCR_DEPENDENCY_MESSAGE
+        : null;
+      setOcrNotice(dependencyNotice);
+      Alert.alert('OCR', dependencyNotice ?? `Failed to run OCR: ${message}`);
+    } finally {
+      setRunningOcr(false);
+    }
+  };
+
+  const ocrStatusText = selectedChapter
+    ? ocrNotice
+      ? `OCR: ${ocrNotice}`
+      : ocrStatus
+      ? `OCR: ${ocrStatus.completed_count}/${ocrStatus.pages_total} pages completed, text ${ocrStatus.chapter_text_length > 0 ? 'available' : 'not available yet'}.`
+      : 'OCR: pending'
+    : 'OCR: no chapter selected';
 
   if (!selectedManga) {
     return (
@@ -158,11 +228,16 @@ const App: React.FC = () => {
         chapter={selectedChapter as MangaDexChapter}
         pages={pages}
         pageIndex={currentPageIndex}
+        ocrStatusText={ocrStatusText}
+        ocrRunning={runningOcr}
         onBack={() => {
           setSelectedChapter(null);
           setPages([]);
           setCurrentPageIndex(0);
+          setOcrStatus(null);
+          setOcrNotice(null);
         }}
+        onRunChapterOcr={handleRunChapterOcr}
         onOpenFullscreen={() => setFullscreenVisible(true)}
         onNext={nextPage}
         onPrev={prevPage}

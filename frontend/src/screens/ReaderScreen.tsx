@@ -8,7 +8,10 @@ interface ReaderScreenProps {
   chapter: MangaDexChapter;
   pages: Page[];
   pageIndex: number;
+  ocrStatusText: string;
+  ocrRunning: boolean;
   onBack: () => void;
+  onRunChapterOcr: () => void;
   onOpenFullscreen: () => void;
   onNext: () => void;
   onPrev: () => void;
@@ -19,7 +22,10 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({
   chapter,
   pages,
   pageIndex,
+  ocrStatusText,
+  ocrRunning,
   onBack,
+  onRunChapterOcr,
   onOpenFullscreen,
   onNext,
   onPrev,
@@ -46,6 +52,13 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({
       <Text style={styles.pageLabel}>
         Page {pages.length ? pageIndex + 1 : 0} / {pages.length}
       </Text>
+
+      <View style={styles.ocrRow}>
+        <TouchableOpacity style={styles.ocrButton} onPress={onRunChapterOcr} disabled={ocrRunning}>
+          <Text style={styles.ocrButtonText}>{ocrRunning ? 'Running OCR...' : 'Run Chapter OCR'}</Text>
+        </TouchableOpacity>
+        <Text style={styles.ocrStatus}>{ocrStatusText}</Text>
+      </View>
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.controlButton} onPress={onPrev}>
@@ -109,6 +122,27 @@ const styles = StyleSheet.create({
   pageLabel: {
     marginTop: 10,
     color: '#243b53',
+  },
+  ocrRow: {
+    marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
+    gap: 6,
+  },
+  ocrButton: {
+    backgroundColor: '#0f766e',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  ocrButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  ocrStatus: {
+    color: '#334e68',
+    fontSize: 13,
+    textAlign: 'center',
   },
   controls: {
     marginTop: 12,

@@ -44,3 +44,7 @@ venv/
 
 # SQLite database (if you don't want to version control it)
 backend/test.db
+
+# Generated backend storage (pages, audio, OCR outputs, etc.)
+backend/storage/**
+!backend/storage/.gitkeep

@@ -1,5 +1,23 @@
 import { API_BASE_URL } from '../config/api';
-import { AudioStatus, Manga, MangaDexChapter, MangaDexManga, Page } from '../types';
+import { AudioStatus, Manga, MangaDexChapter, MangaDexManga, OcrChapterResult, OcrChapterRunResponse, Page } from '../types';
+
+function extractApiErrorMessage(detail: unknown): string {
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+
+  if (detail && typeof detail === 'object') {
+    const detailRecord = detail as Record<string, unknown>;
+    if (typeof detailRecord.message === 'string' && detailRecord.message.trim()) {
+      return detailRecord.message;
+    }
+    if ('detail' in detailRecord) {
+      return extractApiErrorMessage(detailRecord.detail);
+    }
+  }
+
+  return 'Request failed';
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -17,7 +35,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       detail = await response.text();
     }
-    throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+    throw new Error(extractApiErrorMessage(detail));
   }
 
   return response.json() as Promise<T>;
@@ -53,4 +71,10 @@ export const api = {
     request<Page[]>(`/chapters/${encodeURIComponent(chapterId)}/pages`),
   getAudioStatus: (chapterId: string) =>
     request<AudioStatus>(`/audio/chapter/${encodeURIComponent(chapterId)}`),
+  runChapterOcr: (chapterId: string) =>
+    request<OcrChapterRunResponse>(`/ocr/chapter/${encodeURIComponent(chapterId)}`, {
+      method: 'POST',
+    }),
+  getChapterOcr: (chapterId: string) =>
+    request<OcrChapterResult>(`/ocr/chapter/${encodeURIComponent(chapterId)}`),
 };

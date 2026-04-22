@@ -9,6 +9,12 @@ class HealthResponse(BaseModel):
     version: str
 
 
+class DependencyHealthResponse(BaseModel):
+    tesseract_available: bool
+    tesseract_cmd: str
+    error_message: str | None = None
+
+
 class MangaCreate(BaseModel):
     title: str = Field(min_length=1)
     author: str | None = None
@@ -112,3 +118,46 @@ class AudioResponse(BaseModel):
     chapter_id: str
     status: str
     message: str
+    text_available: bool = False
+    chapter_text_length: int = 0
+
+
+class OcrPageResult(BaseModel):
+    page_id: int
+    page_number: int
+    status: str
+    engine_name: str
+    raw_text: str | None = None
+    cleaned_text: str | None = None
+    text_length: int = 0
+    error_message: str | None = None
+
+
+class OcrPageRunResponse(BaseModel):
+    page_id: int
+    chapter_id: str
+    status: str
+    text_length: int
+    engine_name: str
+    error_message: str | None = None
+
+
+class OcrChapterRunResponse(BaseModel):
+    chapter_id: str
+    pages_processed: int
+    success_count: int
+    failure_count: int
+    completed_count: int
+
+
+class OcrChapterResultResponse(BaseModel):
+    chapter_id: str
+    status: str
+    pages_total: int
+    completed_count: int
+    failed_count: int
+    processing_count: int
+    pending_count: int
+    chapter_text: str
+    chapter_text_length: int
+    page_results: list[OcrPageResult]

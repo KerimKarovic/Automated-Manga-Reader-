@@ -54,6 +54,7 @@ class Page(Base):
     chapter: Mapped[Chapter] = relationship("Chapter", back_populates="pages")
     panels: Mapped[list["Panel"]] = relationship("Panel", back_populates="page", cascade="all, delete-orphan")
     analyses: Mapped[list["PageAnalysis"]] = relationship("PageAnalysis", back_populates="page", cascade="all, delete-orphan")
+    ocr_result: Mapped["PageOCR | None"] = relationship("PageOCR", back_populates="page", uselist=False, cascade="all, delete-orphan")
 
 
 class Panel(Base):
@@ -87,3 +88,22 @@ class PageAnalysis(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     page: Mapped[Page] = relationship("Page", back_populates="analyses")
+
+
+class PageOCR(Base):
+    __tablename__ = "page_ocr"
+    __table_args__ = (
+        UniqueConstraint("page_id", name="uq_page_ocr_page_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    page_id: Mapped[int] = mapped_column(ForeignKey("page.id", ondelete="CASCADE"), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cleaned_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    engine_name: Mapped[str] = mapped_column(String(64), nullable=False, default="pytesseract")
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    page: Mapped[Page] = relationship("Page", back_populates="ocr_result")

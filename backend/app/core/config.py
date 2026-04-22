@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     mangadex_at_home_base_url: str = "https://api.mangadex.org/at-home/server"
     request_timeout_seconds: int = 20
     default_language: str = "en"
+    page_cache_dir: str = "./storage/pages"
+    ocr_engine_name: str = "pytesseract"
+    tesseract_cmd: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

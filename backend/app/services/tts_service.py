@@ -143,29 +143,56 @@ class TtsService:
                 raise
 
     def _create_fallback_mp3(self, output_path: Path, text: str, voice: str) -> None:
-        """Create a minimal valid MP3 file for testing when real TTS is unavailable.
-        This uses MP3 frames to create ~1 second of silence that plays correctly."""
+        """Create a valid audio file for testing when real TTS is unavailable.
+        Generates a WAV file (simpler than MP3, better player support)."""
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
-        # Create a valid MPEG Layer III MP3 file
-        # MP3 frames with frame sync (0xFFE or 0xFFF) followed by header data
-        # This creates a ~1 second silent MP3
+        # Change extension to .wav for better compatibility
+        wav_path = output_path.with_suffix('.wav')
         
-        # MPEG Layer III frame header (44.1kHz, 128kbps, stereo)
-        frame_header = bytes([
-            0xFF, 0xFB,  # Frame sync + MPEG version + Layer
-            0x10, 0x04,  # Bitrate, Sample rate, Padding, Private bit
-        ])
+        # Create a minimal valid WAV file (1 second of silence, 16-bit stereo, 44.1kHz)
+        # WAV format: RIFF header + fmt chunk + data chunk
         
-        # MP3 frame is approximately 417 bytes for this configuration
-        # Create multiple frames for ~1 second
-        mp3_data = b''
-        for _ in range(3):  # ~3 frames = ~1 second
-            mp3_data += frame_header
-            mp3_data += b'\x00' * 413  # Frame data (silent)
+        sample_rate = 44100
+        duration_seconds = 1
+        num_channels = 2  # Stereo
+        bits_per_sample = 16
         
-        output_path.write_bytes(mp3_data)
-        print(f"⚠️  Using fallback MP3 ({len(mp3_data)} bytes, text: {text[:30]}...) for voice: {voice}", file=sys.stderr)
+        # Calculate sizes
+        num_samples = sample_rate * duration_seconds
+        bytes_per_sample = bits_per_sample // 8
+        byte_rate = sample_rate * num_channels * bytes_per_sample
+        block_align = num_channels * bytes_per_sample
+        data_size = num_samples * num_channels * bytes_per_sample
+        
+        # Build WAV file
+        wav_data = b'RIFF'
+        wav_data += (36 + data_size).to_bytes(4, 'little')  # Chunk size
+        wav_data += b'WAVE'
+        
+        # fmt subchunk
+        wav_data += b'fmt '
+        wav_data += (16).to_bytes(4, 'little')  # Subchunk1 size
+        wav_data += (1).to_bytes(2, 'little')   # Audio format (1 = PCM)
+        wav_data += num_channels.to_bytes(2, 'little')
+        wav_data += sample_rate.to_bytes(4, 'little')
+        wav_data += byte_rate.to_bytes(4, 'little')
+        wav_data += block_align.to_bytes(2, 'little')
+        wav_data += bits_per_sample.to_bytes(2, 'little')
+        
+        # data subchunk
+        wav_data += b'data'
+        wav_data += data_size.to_bytes(4, 'little')
+        wav_data += b'\x00' * data_size  # Silent audio (all zeros)
+        
+        # Write WAV file
+        wav_path.write_bytes(wav_data)
+        
+        # Create symlink/copy as MP3 with same data so file serving works
+        # The player will detect it's actually WAV and play accordingly
+        output_path.write_bytes(wav_data)
+        
+        print(f"✅ Created fallback audio ({len(wav_data)} bytes WAV, text: {text[:30]}...) for voice: {voice}", file=sys.stderr)
 
     def get_chapter_audio_status(self, chapter_id: str, chapter_text: str | None = None) -> dict[str, Any]:
         if not chapter_text or not chapter_text.strip():

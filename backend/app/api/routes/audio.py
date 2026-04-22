@@ -45,5 +45,24 @@ def serve_audio_file(chapter_id: str, voice: str, text_hash: str):
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail={"message": "Audio file not found"})
 
-    return FileResponse(path=audio_path, media_type="audio/mpeg", filename=f"{chapter_id}.mp3")
+    # Determine media type based on actual file content
+    file_size = audio_path.stat().st_size
+    
+    # Check if it's actually a WAV file (starts with RIFF)
+    with open(audio_path, 'rb') as f:
+        header = f.read(4)
+        if header == b'RIFF':
+            media_type = "audio/wav"
+        elif header[:2] == b'\xff\xfb' or header[:2] == b'\xff\xfa':  # MP3 sync
+            media_type = "audio/mpeg"
+        else:
+            media_type = "audio/mpeg"  # Default fallback
+    
+    # Return with proper headers for streaming
+    return FileResponse(
+        path=audio_path,
+        media_type=media_type,
+        filename=f"{chapter_id}.mp3",
+        headers={"Accept-Ranges": "bytes"}
+    )
 

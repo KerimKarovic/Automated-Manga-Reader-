@@ -13,16 +13,16 @@ from app.services.ocr_service import ocr_service
 from app.utils.file_storage import ensure_dir
 
 try:
-    from piper import PiperVoice
-    PIPER_TTS_AVAILABLE = True
+    from gtts import gTTS
+    GTTS_AVAILABLE = True
 except ImportError:
-    PIPER_TTS_AVAILABLE = False
+    GTTS_AVAILABLE = False
 
 
 class TtsService:
-    DEPENDENCY_ERROR_MESSAGE = "TTS cannot run because piper-tts is not installed or configured on the backend."
+    DEPENDENCY_ERROR_MESSAGE = "TTS cannot run because gtts is not installed or configured on the backend."
     OCR_MISSING_ERROR_MESSAGE = "TTS cannot run because OCR text is not available for this chapter."
-    VOICE_MODEL = "en_US-amy-medium"  # Default Piper voice model
+    VOICE_MODEL = "en"  # gTTS language code
 
     def __init__(self) -> None:
         self._dependency_status = self._detect_tts_dependency()
@@ -50,31 +50,21 @@ class TtsService:
         )
 
     def _detect_tts_dependency(self) -> dict[str, Any]:
-        if not PIPER_TTS_AVAILABLE:
+        if not GTTS_AVAILABLE:
             return {
                 "tts_available": False,
-                "engine_name": "piper-tts",
+                "engine_name": "gtts",
                 "default_voice": self.VOICE_MODEL,
-                "error_message": "piper-tts library not found. Install with: pip install piper-tts",
+                "error_message": "gtts library not found. Install with: pip install gtts",
             }
 
-        # Check if voice model can be loaded
-        try:
-            voice = PiperVoice.load(self.VOICE_MODEL)
-            return {
-                "tts_available": True,
-                "engine_name": "piper-tts",
-                "default_voice": self.VOICE_MODEL,
-                "error_message": None,
-            }
-        except Exception as e:
-            # Piper is installed but model not available - can still use fallback
-            return {
-                "tts_available": True,  # Still true - we have fallback
-                "engine_name": "piper-tts (fallback mode)",
-                "default_voice": self.VOICE_MODEL,
-                "error_message": f"Voice model not available, using fallback audio: {str(e)}",
-            }
+        # gTTS doesn't need model loading, it's ready to go
+        return {
+            "tts_available": True,
+            "engine_name": "gtts (Google Text-to-Speech)",
+            "default_voice": self.VOICE_MODEL,
+            "error_message": None,
+        }
 
     def _get_audio_cache_path(self, chapter_id: str, voice: str, text_hash: str) -> Path:
         cache_root = ensure_dir(settings.audio_cache_dir)
@@ -142,33 +132,31 @@ class TtsService:
             ) from exc
 
     async def _generate_audio_file(self, text: str, output_path: Path, voice: str) -> None:
-        """Generate audio using Piper TTS.
-        Falls back to silence if model is not available."""
-        if not PIPER_TTS_AVAILABLE:
-            # Piper not installed - use fallback
+        """Generate audio using gTTS (Google Text-to-Speech).
+        Falls back to silence if gTTS is not available."""
+        if not GTTS_AVAILABLE:
+            # gTTS not installed - use fallback
             self._create_fallback_mp3(output_path, text, voice)
             return
         
         try:
-            # Load the voice model and generate audio
-            piper_voice = PiperVoice.load(voice)
-            
-            # Generate audio to bytes
-            wav_data = bytearray()
-            
-            # Use Piper to synthesize speech
-            for audio_chunk in piper_voice.synthesize(text):
-                wav_data.extend(audio_chunk)
-            
-            # Write to output file
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_bytes(bytes(wav_data))
             
-            print(f"✅ Generated audio using Piper ({len(wav_data)} bytes, voice: {voice})", file=sys.stderr)
+            # Use gTTS to synthesize speech
+            # voice parameter should be a language code (e.g., 'en', 'es', 'fr')
+            lang = voice if isinstance(voice, str) and len(voice) <= 5 else 'en'
+            
+            tts = gTTS(text=text, lang=lang, slow=False)
+            
+            # Save to file
+            tts.save(str(output_path))
+            
+            file_size = output_path.stat().st_size
+            print(f"✅ Generated audio using gTTS ({file_size} bytes, language: {lang})", file=sys.stderr)
             
         except Exception as e:
             # If anything fails, use fallback
-            print(f"⚠️  Piper generation failed: {str(e)}, using fallback", file=sys.stderr)
+            print(f"⚠️  gTTS generation failed: {str(e)}, using fallback", file=sys.stderr)
             self._create_fallback_mp3(output_path, text, voice)
 
     def _create_fallback_mp3(self, output_path: Path, text: str, voice: str) -> None:

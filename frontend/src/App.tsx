@@ -238,22 +238,30 @@ const App: React.FC = () => {
       // Construct full URL if relative
       const fullUrl = audioUrl.startsWith('http') ? audioUrl : `${API_BASE_URL}${audioUrl}`;
 
+      console.log('Loading audio from:', fullUrl);
       const sound = new Audio.Sound();
       
       // Set up callback for when playback finishes
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
+          console.log('Audio playback finished');
           setPlayingAudio(false);
           setAudioPlayer(null);
+          Alert.alert('Playback Complete', 'Audio finished playing');
         }
       });
 
+      console.log('Loading audio file...');
       await sound.loadAsync({ uri: fullUrl });
+      console.log('Audio loaded, starting playback...');
       await sound.playAsync();
       setAudioPlayer(sound);
+      console.log('Playback started');
+      Alert.alert('Playing Audio', 'Audio is now playing (you may hear silence if using fallback)');
     } catch (error) {
       setPlayingAudio(false);
       const message = error instanceof Error ? error.message : String(error);
+      console.error('Audio playback error:', message);
       Alert.alert('Playback Error', `Failed to play audio: ${message}`);
     }
   };

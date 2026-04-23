@@ -142,11 +142,13 @@ const App: React.FC = () => {
     }
   };
 
-  const nextPage = () => {
+  const nextPage = async () => {
+    await stopAudio();
     setCurrentPageIndex((prev) => Math.min(prev + 1, Math.max(0, pages.length - 1)));
   };
 
-  const prevPage = () => {
+  const prevPage = async () => {
+    await stopAudio();
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
   };
 
@@ -174,56 +176,50 @@ const App: React.FC = () => {
       return;
     }
 
+    const currentPage = pages[currentPageIndex];
+    if (!currentPage) {
+      Alert.alert('No Page', 'Unable to load current page');
+      return;
+    }
+
+    // Get current page OCR text (not entire chapter)
+    const pageOcrText = currentPage.ocr_text?.trim();
+    if (!pageOcrText) {
+      Alert.alert('No Text', 'Current page has no OCR text. Please run OCR first.');
+      return;
+    }
+
     try {
       setPlayingAudio(true);
 
-      // Get current audio status
-      const audioStatus = await api.getChapterAudioStatus(selectedChapter.id);
-
-      // If OCR text is unavailable, show error
-      if (audioStatus.status === 'unavailable') {
-        setPlayingAudio(false);
-        Alert.alert('Audio Not Available', audioStatus.message);
-        return;
-      }
-
-      // If audio hasn't been generated yet, generate it first
-      if (!audioStatus.generated) {
-        Alert.alert('Generating Audio', 'Creating MP3 from text... this may take a moment.');
-        try {
-          const generated = await api.generateChapterAudio(selectedChapter.id);
-          Alert.alert('Audio Generated', `Ready to play. (Cached: ${generated.cached})`);
-          // Update status for URL
-          const updatedStatus = await api.getChapterAudioStatus(selectedChapter.id);
-          if (!updatedStatus.audio_url) {
-            setPlayingAudio(false);
-            Alert.alert('Error', 'Generated audio URL is missing');
-            return;
-          }
-          await playAudio(updatedStatus.audio_url);
-        } catch (generateError) {
-          const message = generateError instanceof Error ? generateError.message : String(generateError);
-          if (message.includes('not installed') || message.includes('not available')) {
-            Alert.alert('TTS Not Available', message);
-          } else if (message.includes('OCR text')) {
-            Alert.alert('No Text to Convert', message);
-          } else {
-            Alert.alert('Generation Failed', message);
-          }
+      // Generate audio for current page only
+      Alert.alert('Generating Audio', 'Creating MP3 from current page text... this may take a moment.');
+      try {
+        const generated = await api.generateChapterAudio(selectedChapter.id, pageOcrText);
+        Alert.alert('Audio Generated', `Ready to play current page. (Cached: ${generated.cached})`);
+        // Get the audio URL
+        if (!generated.audio_url) {
           setPlayingAudio(false);
+          Alert.alert('Error', 'Generated audio URL is missing');
           return;
         }
-      } else if (audioStatus.audio_url) {
-        // Audio already generated, play it
-        await playAudio(audioStatus.audio_url);
-      } else {
+        await playAudio(generated.audio_url);
+      } catch (generateError) {
+        const message = generateError instanceof Error ? generateError.message : String(generateError);
+        if (message.includes('not installed') || message.includes('not available')) {
+          Alert.alert('TTS Not Available', message);
+        } else if (message.includes('OCR text')) {
+          Alert.alert('No Text to Convert', message);
+        } else {
+          Alert.alert('Generation Failed', message);
+        }
         setPlayingAudio(false);
-        Alert.alert('Error', 'Audio URL is missing');
+        return;
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      Alert.alert('Playback Error', message);
       setPlayingAudio(false);
-      const message = error instanceof Error ? error.message : String(error);
-      Alert.alert('Audio Error', message);
     }
   };
 
@@ -338,18 +334,20 @@ const App: React.FC = () => {
         pageIndex={currentPageIndex}
         ocrStatusText={ocrStatusText}
         ocrRunning={runningOcr}
-        onBack={() => {
+        audioPlaying={playingAudio}
+        onBack={async () => {
+          await stopAudio();
           setSelectedChapter(null);
           setPages([]);
           setCurrentPageIndex(0);
           setOcrStatus(null);
           setOcrNotice(null);
-          stopAudio();
         }}
         onRunChapterOcr={handleRunChapterOcr}
         onOpenFullscreen={() => setFullscreenVisible(true)}
         onNext={nextPage}
         onPrev={prevPage}
+        onAudioPress={handleAudioPress}
       />
 
       {currentPage ? (

@@ -69,9 +69,10 @@ export const api = {
     ),
   getChapterPages: (chapterId: string) =>
     request<Page[]>(`/chapters/${encodeURIComponent(chapterId)}/pages`),
-  generateChapterAudio: (chapterId: string) =>
+  generateChapterAudio: (chapterId: string, pageText?: string) =>
     request<AudioGenerateResponse>(`/audio/chapter/${encodeURIComponent(chapterId)}/generate`, {
       method: 'POST',
+      body: pageText ? JSON.stringify({ text: pageText }) : undefined,
     }),
   getChapterAudioStatus: (chapterId: string) =>
     request<AudioStatusResponse>(`/audio/chapter/${encodeURIComponent(chapterId)}`),

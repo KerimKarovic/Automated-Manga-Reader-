@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class HealthResponse(BaseModel):
@@ -57,6 +57,7 @@ class PageOut(BaseModel):
     image_url: str
     quality: str
     local_image_path: str | None
+    ocr_text: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

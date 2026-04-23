@@ -10,11 +10,13 @@ interface ReaderScreenProps {
   pageIndex: number;
   ocrStatusText: string;
   ocrRunning: boolean;
+  audioPlaying: boolean;
   onBack: () => void;
   onRunChapterOcr: () => void;
   onOpenFullscreen: () => void;
   onNext: () => void;
   onPrev: () => void;
+  onAudioPress: () => void;
 }
 
 const ReaderScreen: React.FC<ReaderScreenProps> = ({
@@ -24,11 +26,13 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({
   pageIndex,
   ocrStatusText,
   ocrRunning,
+  audioPlaying,
   onBack,
   onRunChapterOcr,
   onOpenFullscreen,
   onNext,
   onPrev,
+  onAudioPress,
 }) => {
   const currentPage = pages[pageIndex];
 
@@ -56,6 +60,12 @@ const ReaderScreen: React.FC<ReaderScreenProps> = ({
       <View style={styles.ocrRow}>
         <TouchableOpacity style={styles.ocrButton} onPress={onRunChapterOcr} disabled={ocrRunning}>
           <Text style={styles.ocrButtonText}>{ocrRunning ? 'Running OCR...' : 'Run Chapter OCR'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.audioButton, audioPlaying && styles.audioButtonPlaying]} 
+          onPress={onAudioPress}
+        >
+          <Text style={styles.audioButtonText}>{audioPlaying ? 'Stop Audio' : 'Play Audio'}</Text>
         </TouchableOpacity>
         <Text style={styles.ocrStatus}>{ocrStatusText}</Text>
       </View>
@@ -136,6 +146,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   ocrButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  audioButton: {
+    backgroundColor: '#7c2d12',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  audioButtonPlaying: {
+    backgroundColor: '#ea580c',
+  },
+  audioButtonText: {
     color: '#fff',
     fontWeight: '600',
   },

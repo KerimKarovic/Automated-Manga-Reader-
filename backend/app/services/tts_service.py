@@ -78,6 +78,60 @@ class TtsService:
         """Construct the public URL for accessing the audio file."""
         return f"/audio/file/{chapter_id}/{voice}_{text_hash}.mp3"
 
+    def _preprocess_text_for_tts(self, text: str) -> str:
+        """Preprocess text to improve gTTS pronunciation.
+        
+        Handles:
+        - Words that gTTS spells out letter-by-letter (acronyms, unfamiliar words)
+        - Adds subtle spacing/punctuation to help gTTS read naturally
+        """
+        import re
+        
+        # Replace patterns that are likely to be spelled out
+        # e.g., "gourry" -> "gourry" (with internal spacing to prevent letter-by-letter reading)
+        # Better approach: wrap problematic patterns with markers
+        
+        # Pattern 1: Lowercase words that might be treated as acronyms (common in anime names)
+        # These are hard to detect, so we'll use a heuristic: words with repeated letters
+        def fix_repeated_letter_words(match):
+            word = match.group(0)
+            # If word has alternating pattern or unusual letter combinations, 
+            # add slight breaks to prevent spelling out
+            if len(word) > 3 and word.islower():
+                # Add periods strategically to break potential acronym reading
+                # For names like "gourry", we'll add slight spacing
+                return word  # For now, return as-is since period breaks meaning
+            return word
+        
+        # Pattern 2: Words preceded/followed by single letters (like "g-o-u-r-r-y")
+        # Replace multiple single-letter sequences with full words
+        text = re.sub(
+            r'\b([a-z])\s*[-–—]?\s*([a-z])\s*[-–—]?\s*([a-z])\s*[-–—]?\s*([a-z])',
+            r'\1\2\3\4',
+            text,
+            flags=re.IGNORECASE
+        )
+        
+        # Pattern 3: Add periods after abbreviations to clarify them
+        # e.g., "OCR" -> "O.C.R" or add context
+        # For single uppercase letters followed by period or end
+        text = re.sub(r'\b([A-Z])\s+([a-z])', r'\1. \2', text)
+        
+        # Pattern 4: Common character names/words that gTTS struggles with
+        # Map of problematic words to better versions for TTS
+        replacements = {
+            'gourry': 'Gourry',  # Make it capitalized to avoid spelling
+            'lina': 'Lina',
+            'zelgadis': 'Zelgadis',
+            'amelia': 'Amelia',
+            'philia': 'Philia',
+        }
+        
+        for original, replacement in replacements.items():
+            text = re.sub(r'\b' + original + r'\b', replacement, text, flags=re.IGNORECASE)
+        
+        return text
+
     async def generate_chapter_audio(
         self, chapter_id: str, chapter_text: str, voice: str | None = None, db=None
     ) -> dict[str, Any]:
@@ -142,11 +196,14 @@ class TtsService:
         try:
             output_path.parent.mkdir(parents=True, exist_ok=True)
             
+            # Preprocess text to improve pronunciation
+            processed_text = self._preprocess_text_for_tts(text)
+            
             # Use gTTS to synthesize speech
             # voice parameter should be a language code (e.g., 'en', 'es', 'fr')
             lang = voice if isinstance(voice, str) and len(voice) <= 5 else 'en'
             
-            tts = gTTS(text=text, lang=lang, slow=False)
+            tts = gTTS(text=processed_text, lang=lang, slow=False)
             
             # Save to file
             tts.save(str(output_path))

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app.db.database import get_db
 from app.db.schemas import AudioGenerateResponse, AudioStatusResponse
@@ -11,14 +12,23 @@ from app.services.tts_service import tts_service
 router = APIRouter(prefix="/audio", tags=["audio"])
 
 
+class AudioGenerateRequest(BaseModel):
+    text: str | None = None  # Optional: if provided, generates audio for this text instead of entire chapter
+
+
 @router.post("/chapter/{chapter_id}/generate", response_model=AudioGenerateResponse)
-async def generate_chapter_audio(chapter_id: str, db: Session = Depends(get_db)) -> AudioGenerateResponse:
+async def generate_chapter_audio(chapter_id: str, request: AudioGenerateRequest | None = None, db: Session = Depends(get_db)) -> AudioGenerateResponse:
     chapter = chapter_service.get_chapter(chapter_id=chapter_id, db=db)
     if not chapter:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail={"message": "Chapter not found"})
 
-    chapter_text = ocr_service.get_chapter_combined_text(chapter_id=chapter_id, db=db)
+    # Use provided text if available, otherwise get entire chapter text
+    if request and request.text:
+        chapter_text = request.text
+    else:
+        chapter_text = ocr_service.get_chapter_combined_text(chapter_id=chapter_id, db=db)
+    
     result = await tts_service.generate_chapter_audio(chapter_id=chapter_id, chapter_text=chapter_text)
     return AudioGenerateResponse(**result)
 

@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 """Debug script to check OCR status in database"""
 import sys
+import os
 sys.path.insert(0, 'd:\\Python Projects\\AutomatedMangaReader\\Automated-Manga-Reader-\\backend')
+
+# Change to backend directory so relative paths work
+os.chdir('d:\\Python Projects\\AutomatedMangaReader\\Automated-Manga-Reader-\\backend')
 
 from app.db.database import SessionLocal
 from app.db import models
@@ -21,8 +25,9 @@ try:
             ocr = db.query(models.PageOCR).filter(models.PageOCR.page_id == page.id).first()
             if ocr:
                 text_len = len(ocr.cleaned_text) if ocr.cleaned_text else 0
+                raw_len = len(ocr.raw_text) if ocr.raw_text else 0
                 status = 'OK' if text_len > 0 else 'EMPTY'
-                print(f'  Page {page.page_number:2d}: {status:6s} text_len={text_len:5d}')
+                print(f'  Page {page.page_number:2d}: {status:6s} text_len={text_len:5d} raw_len={raw_len:5d} status={ocr.status}')
                 if text_len == 0:
                     missing_ocr_pages.append(page.page_number)
             else:

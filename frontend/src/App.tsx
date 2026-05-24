@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
-import { Audio } from 'expo-av';
+import { Audio } from 'expo-audio';
 
 import FullscreenReader from './components/FullscreenReader';
 import ChapterListScreen from './screens/ChapterListScreen';

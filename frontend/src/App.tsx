@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
-import { Audio } from 'expo-audio';
+import { Audio } from 'expo-av';
 
 import FullscreenReader from './components/FullscreenReader';
 import ChapterListScreen from './screens/ChapterListScreen';
@@ -183,7 +183,8 @@ const App: React.FC = () => {
     }
 
     // Get current page OCR text (not entire chapter)
-    const pageOcrText = currentPage.ocr_text?.trim();
+    const pageResult = ocrStatus?.page_results?.find((p) => p.page_number === currentPage.page_number);
+    const pageOcrText = (pageResult?.cleaned_text || pageResult?.raw_text || '')?.trim();
     if (!pageOcrText) {
       Alert.alert('No Text', 'Current page has no OCR text. Please run OCR first.');
       return;
@@ -238,7 +239,7 @@ const App: React.FC = () => {
       const sound = new Audio.Sound();
       
       // Set up callback for when playback finishes
-      sound.setOnPlaybackStatusUpdate((status) => {
+      sound.setOnPlaybackStatusUpdate((status: any) => {
         if (status.isLoaded && status.didJustFinish) {
           console.log('Audio playback finished');
           setPlayingAudio(false);

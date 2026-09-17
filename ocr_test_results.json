@@ -1,0 +1,82 @@
+﻿[
+    {
+        "raw_text":  "aa a\n\n",
+        "cleaned_text":  "aa a",
+        "page_number":  1,
+        "text_length":  4,
+        "page_id":  271,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "Shoko Yoshinaka\n\n| know of someone who gets in trouble\noften, Usually for such outrageous\nreasons that the peace loving primates\ndon\u0027t believe them. They have a rather\npoor reputation because of that.\n\nThe beautifcl protagonist of this story Is\nno different.\n\nWell, maybe a little different...\n\nAKAM / ROM\n\nRwRtTEa\n",
+        "cleaned_text":  "Shoko Yoshinaka\n| know of someone who gets in trouble\noften, Usually for such outrageous\nreasons that the peace loving primates\ndon\u0027t believe them. They have a rather\npoor reputation because of that.\nThe beautifcl protagonist of this story Is\nno different.\nWell, maybe a little different...\nAKAM / ROM\nRwRtTEa",
+        "page_number":  2,
+        "text_length":  309,
+        "page_id":  272,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "Â¥\n~â\n\nees eee\n-, Fa hy\n\nan\nan\n",
+        "cleaned_text":  "Â¥\n~â\nees eee\n-, Fa hy\nan\nan",
+        "page_number":  3,
+        "text_length":  27,
+        "page_id":  273,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "",
+        "cleaned_text":  "",
+        "page_number":  4,
+        "text_length":  0,
+        "page_id":  274,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "",
+        "cleaned_text":  "",
+        "page_number":  5,
+        "text_length":  0,
+        "page_id":  275,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "AUMHMH! TT\nJUST FEELS 60\n\n",
+        "cleaned_text":  "AUMHMH! TT\nJUST FEELS 60",
+        "page_number":  6,
+        "text_length":  24,
+        "page_id":  276,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "YOu COULD\nSAY, TMA\nBIT OF A\n\nCELEBRITY\n\n",
+        "cleaned_text":  "YOu COULD\nSAY, TMA\nBIT OF A\nCELEBRITY",
+        "page_number":  7,
+        "text_length":  37,
+        "page_id":  277,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "",
+        "cleaned_text":  "",
+        "page_number":  8,
+        "text_length":  0,
+        "page_id":  278,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "\"/\n\n/\n\na\nVir\n\n\\\\\n\nâ\\\n\nâ\n\n] ;\n\n",
+        "cleaned_text":  "\"/\n/\na\nVir\n\\\\\nâ\\\nâ\n] ;",
+        "page_number":  9,
+        "text_length":  22,
+        "page_id":  279,
+        "status":  "completed"
+    },
+    {
+        "raw_text":  "Â° y ) ~\nCD) 2\n\n_\n\nTt CAN\u0027T use\nANY FANCY\n\nSPELLS\n\n",
+        "cleaned_text":  "Â° y ) ~\nCD) 2\n_\nTt CAN\u0027T use\nANY FANCY\nSPELLS",
+        "page_number":  10,
+        "text_length":  45,
+        "page_id":  280,
+        "status":  "completed"
+    }
+]

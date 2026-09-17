@@ -1,0 +1,102 @@
+[
+  {
+    "page_id": 271,
+    "page_number": 1,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "2 BTTHIE EEGEND\n; ECGEND_ OF. DARKNESS NN \\N\n\\ sf! SEM\n; ry eine OF amend 4 ,or.\n\nSNES ALTON SN SOUS)\n\nSES Phe AL ™ By Lyn a.\nKen So\nRNG, (ee\nLe ASS NINES\nNe age /SHOKO 725:\nse SONG /TAVOSHING A:\n",
+    "cleaned_text": "2 BTTHIE EEGEND\n; ECGEND_ OF. DARKNESS NN \\N\n\\ sf! SEM\n; ry eine OF amend 4 ,or.\nSNES ALTON SN SOUS)\nSES Phe AL ™ By Lyn a.\nKen So\nRNG, (ee\nLe ASS NINES\nNe age /SHOKO 725:\nse SONG /TAVOSHING A:",
+    "text_length": 193,
+    "error_message": null
+  },
+  {
+    "page_id": 272,
+    "page_number": 2,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "°\n3 { ¢\nae Ay fal\nSANS) 1\nAEA bes\n& ny tt on\nJf, ana FS er\nShoko Yoshinaka\nI know of someone who gets In trouble\noften. Usually for such outrageous\nreasons that the peace loving primates\ndon't believe them. They have a rather\npoor reputation because of that.\nThe beautiful protagonist of this story is\nno different.\nWell, maybe a little different...\n°o\nAA -CM/RI\nBM RITS\n",
+    "cleaned_text": "3 { ¢\nae Ay fal\nSANS) 1\nAEA bes\n& ny tt on\nJf, ana FS er\nShoko Yoshinaka\nI know of someone who gets In trouble\noften. Usually for such outrageous\nreasons that the peace loving primates\ndon't believe them. They have a rather\npoor reputation because of that.\nThe beautiful protagonist of this story is\nno different.\nWell, maybe a little different...\no\nAA -CM/RI\nBM RITS",
+    "text_length": 367,
+    "error_message": null
+  },
+  {
+    "page_id": 273,
+    "page_number": 3,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "<P UP ~ yt 5A \\ wnt Zonye WHERE\nhe AE Decca We IS YOUR\n} Y BELINO, IN 3) = LG AN ’ Pe\n< BACK... Jat ANC RIES RS }\nroad Aa)\nbt WOMA SKN 3) Ne\nAS LONG Jom ae JR SYS) you wor!\nOF Loot ws ASS a HER?\n‘\\ HERE! => 4 @ : C\nWas SSS JIE DD\n‘. Sy Of Ww ww\nWe. {| Because CPD) : YW 4 ea veo\n(My Peope |; ) ASRS HA fa. ye / WHAT\niN conprom |] Heil N ere rmS “te! | causes\nDN eae i Ss iia FEN SAA FiGuts? /\nZaks YY cee. Fale sp \\\"\nAEN EGE i © ‘f “t PL ef £1 if £\n",
+    "cleaned_text": "<P UP ~ yt 5A \\ wnt Zonye WHERE\nhe AE Decca We IS YOUR\n} Y BELINO, IN 3) = LG AN ’ Pe\n< BACK... Jat ANC RIES RS }\nroad Aa)\nbt WOMA SKN 3) Ne\nAS LONG Jom ae JR SYS) you wor!\nOF Loot ws ASS a HER?\n‘\\ HERE! => 4 @ : C\nWas SSS JIE DD\n‘. Sy Of Ww ww\nWe. {| Because CPD) : YW 4 ea veo\n(My Peope |; ) ASRS HA fa. ye / WHAT\niN conprom |] Heil N ere rmS “te! | causes\nDN eae i Ss iia FEN SAA FiGuts? /\nZaks YY cee. Fale sp \\\"\nAEN EGE i © ‘f “t PL ef £1 if £",
+    "text_length": 448,
+    "error_message": null
+  },
+  {
+    "page_id": 274,
+    "page_number": 4,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "; ara I: ;\n7 LL te we a ees THAT'S too. fx } ‘| aie D\nyy } ru mal GT Ne A hf 1 ORAL OCA\nYE ZEB LON BES RSG\nI Ne: * REY ~ MS Y); ae erie ae VW . peeve iT _ excuse\n\n\\ s NAS, cee [oS aT WR > 3\n",
+    "cleaned_text": "; ara I: ;\n7 LL te we a ees THAT'S too. fx } ‘| aie D\nyy } ru mal GT Ne A hf 1 ORAL OCA\nYE ZEB LON BES RSG\nI Ne: * REY ~ MS Y); ae erie ae VW . peeve iT _ excuse\n\\ s NAS, cee [oS aT WR > 3",
+    "text_length": 188,
+    "error_message": null
+  },
+  {
+    "page_id": 275,
+    "page_number": 5,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "AND FOR THE MY BRO |\nTLL “> \\ WARNING WILL GET\nTELL mm .. a YOU!\n| 1 OAV BRS Ns Lat er\nar let f a AES he Bae So ai\nINVERSE =p BIN SY Ne: ACY 5)\ntS a\nPLATTER Ame 7 “) —etaNN ——-\nEe\noY el | AEN S\n“il he IM) weet pr HHH tt\nSCE TE ne\nSESE oe? HY LV KEEP .\nLF. SB ed\"\\ ffl See\n} el oS aire >A, Ph Mowry\nNi =] oO : LE pond ONO\nLr ae\nNY bo gto HANS Lass\n“\\ uc AEZAN NECA\nAl toon LZZESAAT I N ORAZ\n\\ Lee NENA\n“ass |; a oe )\n",
+    "cleaned_text": "AND FOR THE MY BRO |\nTLL “> \\ WARNING WILL GET\nTELL mm .. a YOU!\n| 1 OAV BRS Ns Lat er\nar let f a AES he Bae So ai\nINVERSE =p BIN SY Ne: ACY 5)\ntS a\nPLATTER Ame 7 “) —etaNN ——-\nEe\noY el | AEN S\n“il he IM) weet pr HHH tt\nSCE TE ne\nSESE oe? HY LV KEEP .\nLF. SB ed\"\\ ffl See\n} el oS aire >A, Ph Mowry\nNi =] oO : LE pond ONO\nLr ae\nNY bo gto HANS Lass\n“\\ uc AEZAN NECA\nAl toon LZZESAAT I N ORAZ\n\\ Lee NENA\n“ass |; a oe )",
+    "text_length": 415,
+    "error_message": null
+  },
+  {
+    "page_id": 276,
+    "page_number": 6,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "0. ayy’. I DIDNT HAVE\nRese) | BUT THIS | LATS\nos ag. KLINGS\nBOSC SO\nADOBE SEIS\nN : \\ CAG. J. D\nte GOOD TO 0O reo KS .\nSEN INN ~ _ “6\nMITD [SENS ZR SALES 7 gh\nKF HA AAC RSH YA &°\nfo gO ay oils fg * WP 5\n",
+    "cleaned_text": "0. ayy’. I DIDNT HAVE\nRese) | BUT THIS | LATS\nos ag. KLINGS\nBOSC SO\nADOBE SEIS\nN : \\ CAG. J. D\nte GOOD TO 0O reo KS .\nSEN INN ~ _ “6\nMITD [SENS ZR SALES 7 gh\nKF HA AAC RSH YA &\nfo gO ay oils fg * WP 5",
+    "text_length": 200,
+    "error_message": null
+  },
+  {
+    "page_id": 277,
+    "page_number": 7,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "| \\e\nSup eles psn Back NOW\nso00- | - Pee Ger Ny mets\ncoon! Pode Lore AS We, GOING ZY»\nA ON A |\non Vu weetne, Mpa 45x\n4 rma Be Loree Fr, \\\" pss 6\ngig 9] eeaumruL fay Soe ee RLAS YEARS\nSf) conceness igh 7, oe we\nBEM Ee am ROA BI (NC NN\nTHIS HOBBY P| MY HOBBY K ~ (#\n, Oe aw.\nSA*{ youcouro | THERE ¢ s Koos\nSw SAY, I'MA \\?) (A. gh”\neisA BIT OFA ; 5 : ] |\na] CELEBRITY an € f eo, N inh\nhey \\\\ Sess\n4 a y 4 ' % ene, 8\n",
+    "cleaned_text": "| \\e\nSup eles psn Back NOW\nso00- | - Pee Ger Ny mets\ncoon! Pode Lore AS We, GOING ZY»\nA ON A |\non Vu weetne, Mpa 45x\n4 rma Be Loree Fr, \\\" pss 6\ngig 9] eeaumruL fay Soe ee RLAS YEARS\nSf) conceness igh 7, oe we\nBEM Ee am ROA BI (NC NN\nTHIS HOBBY P| MY HOBBY K ~ (#\n, Oe aw.\nSA*{ youcouro | THERE ¢ s Koos\nSw SAY, I'MA \\?) (A. gh”\neisA BIT OFA ; 5 : ] |\na] CELEBRITY an € f eo, N inh\nhey \\\\ Sess\n4 a y 4 ' % ene, 8",
+    "text_length": 412,
+    "error_message": null
+  },
+  {
+    "page_id": 278,
+    "page_number": 8,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "CU Ah\n. ~~ dad(4. AGA FP\n\n, Nase EAN Ra, K “UY BRO ee\n© Fs 4 . i \\ a fr °\nVA aN\n[LEK AS Wo\n\nLS YOURE. / y ee\n\nt= ¥ fA i\nyo (|| women | oh wt |\n",
+    "cleaned_text": "CU Ah\n. ~~ dad(4. AGA FP\n, Nase EAN Ra, K “UY BRO ee\n© Fs 4 . i \\ a fr\nVA aN\n[LEK AS Wo\nLS YOURE. / y ee\nt= ¥ fA i\nyo (|| women | oh wt |",
+    "text_length": 137,
+    "error_message": null
+  },
+  {
+    "page_id": 279,
+    "page_number": 9,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "‘WIS (OA\n\\; lif WE CAN'T ARAN aH\ny Ee @ “GUARD aw LS | I'M HERE TO\n~ ; Nes you War SE A\noe Asyry Ss \\¥\nZs pre SLESSS NY, AN MANY OF\n4 | \\s wy Ww S | ATTACK A\n“IN f \\s ‘ Ges \\ OA “GIRL? :\nte AONE IN Se y\nMy NY Saf A HHH\nLOOT! P3 (Ae 2 =/ Y} eo\n",
+    "cleaned_text": "‘WIS (OA\n\\; lif WE CAN'T ARAN aH\ny Ee @ “GUARD aw LS | I'M HERE TO\n~ ; Nes you War SE A\noe Asyry Ss \\¥\nZs pre SLESSS NY, AN MANY OF\n4 | \\s wy Ww S | ATTACK A\n“IN f \\s ‘ Ges \\ OA “GIRL? :\nte AONE IN Se y\nMy NY Saf A HHH\nLOOT! P3 (Ae 2 =/ Y} eo",
+    "text_length": 242,
+    "error_message": null
+  },
+  {
+    "page_id": 280,
+    "page_number": 10,
+    "status": "completed",
+    "engine_name": "pytesseract",
+    "raw_text": "+ PN,\nLy =\ni 1 XN ¥ ve Veal THIS GIRL\n‘WENA Sy, cA CARES MORE\nRAS LB, ie\nf ~ \\ Wea —_ FOR HER LIFE!\nES as WOMAN AT oz A =\n4635775: ISD SO2\\\neo AALAND RR AWC (1\na i MONEY\nSSA\nRR OI i, DS\nor CA 4) (de —TAA BELIEFS! fo\nT'LL HAVE Te i: We bE 2 | ANY FANCY\nary he, YN)\n",
+    "cleaned_text": "+ PN,\nLy =\ni 1 XN ¥ ve Veal THIS GIRL\n‘WENA Sy, cA CARES MORE\nRAS LB, ie\nf ~ \\ Wea —_ FOR HER LIFE!\nES as WOMAN AT oz A =\n4635775: ISD SO2\\\neo AALAND RR AWC (1\na i MONEY\nSSA\nRR OI i, DS\nor CA 4) (de —TAA BELIEFS! fo\nT'LL HAVE Te i: We bE 2 | ANY FANCY\nary he, YN)",
+    "text_length": 263,
+    "error_message": null
+  }
+]

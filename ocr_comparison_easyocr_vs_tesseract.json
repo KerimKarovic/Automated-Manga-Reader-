@@ -1,0 +1,103 @@
+{
+  "summary": {
+    "total_tesseract_chars": 2865,
+    "total_easyocr_chars": 2054,
+    "total_difference": -811,
+    "difference_percentage": -28.307155322862126,
+    "average_ratio": 0.7738476052815082,
+    "pages_better_or_equal": 2,
+    "pages_worse": 8
+  },
+  "page_comparisons": [
+    {
+      "page_num": 1,
+      "page_id": 271,
+      "tesseract_chars": 193,
+      "easyocr_chars": 89,
+      "improvement": -104,
+      "improvement_pct": -53.8860103626943,
+      "ratio": 0.46113989637305697
+    },
+    {
+      "page_num": 2,
+      "page_id": 272,
+      "tesseract_chars": 367,
+      "easyocr_chars": 299,
+      "improvement": -68,
+      "improvement_pct": -18.52861035422343,
+      "ratio": 0.8147138964577657
+    },
+    {
+      "page_num": 3,
+      "page_id": 273,
+      "tesseract_chars": 448,
+      "easyocr_chars": 264,
+      "improvement": -184,
+      "improvement_pct": -41.07142857142857,
+      "ratio": 0.5892857142857143
+    },
+    {
+      "page_num": 4,
+      "page_id": 274,
+      "tesseract_chars": 188,
+      "easyocr_chars": 250,
+      "improvement": 62,
+      "improvement_pct": 32.97872340425532,
+      "ratio": 1.3297872340425532
+    },
+    {
+      "page_num": 5,
+      "page_id": 275,
+      "tesseract_chars": 415,
+      "easyocr_chars": 176,
+      "improvement": -239,
+      "improvement_pct": -57.59036144578313,
+      "ratio": 0.42409638554216866
+    },
+    {
+      "page_num": 6,
+      "page_id": 276,
+      "tesseract_chars": 200,
+      "easyocr_chars": 180,
+      "improvement": -20,
+      "improvement_pct": -10.0,
+      "ratio": 0.9
+    },
+    {
+      "page_num": 7,
+      "page_id": 277,
+      "tesseract_chars": 412,
+      "easyocr_chars": 267,
+      "improvement": -145,
+      "improvement_pct": -35.19417475728155,
+      "ratio": 0.6480582524271845
+    },
+    {
+      "page_num": 8,
+      "page_id": 278,
+      "tesseract_chars": 137,
+      "easyocr_chars": 144,
+      "improvement": 7,
+      "improvement_pct": 5.109489051094891,
+      "ratio": 1.051094890510949
+    },
+    {
+      "page_num": 9,
+      "page_id": 279,
+      "tesseract_chars": 242,
+      "easyocr_chars": 171,
+      "improvement": -71,
+      "improvement_pct": -29.338842975206614,
+      "ratio": 0.7066115702479339
+    },
+    {
+      "page_num": 10,
+      "page_id": 280,
+      "tesseract_chars": 263,
+      "easyocr_chars": 214,
+      "improvement": -49,
+      "improvement_pct": -18.631178707224336,
+      "ratio": 0.8136882129277566
+    }
+  ]
+}

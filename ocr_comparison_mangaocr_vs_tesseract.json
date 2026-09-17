@@ -1,0 +1,94 @@
+{
+  "summary": {
+    "total_tesseract_chars": 2865,
+    "total_mangaocr_chars": 54,
+    "total_improvement": -2811,
+    "improvement_percentage": -98.1151832460733,
+    "avg_improvement_per_page": -97.74000255508909,
+    "pages_better": 0,
+    "pages_worse": 10,
+    "pages_equal": 0
+  },
+  "page_comparisons": [
+    {
+      "page_num": 1,
+      "page_id": 271,
+      "tesseract_chars": 193,
+      "mangaocr_chars": 4,
+      "improvement": -189,
+      "improvement_pct": -97.92746113989638
+    },
+    {
+      "page_num": 2,
+      "page_id": 272,
+      "tesseract_chars": 367,
+      "mangaocr_chars": 5,
+      "improvement": -362,
+      "improvement_pct": -98.63760217983652
+    },
+    {
+      "page_num": 3,
+      "page_id": 273,
+      "tesseract_chars": 448,
+      "mangaocr_chars": 8,
+      "improvement": -440,
+      "improvement_pct": -98.21428571428571
+    },
+    {
+      "page_num": 4,
+      "page_id": 274,
+      "tesseract_chars": 188,
+      "mangaocr_chars": 7,
+      "improvement": -181,
+      "improvement_pct": -96.27659574468085
+    },
+    {
+      "page_num": 5,
+      "page_id": 275,
+      "tesseract_chars": 415,
+      "mangaocr_chars": 5,
+      "improvement": -410,
+      "improvement_pct": -98.79518072289156
+    },
+    {
+      "page_num": 6,
+      "page_id": 276,
+      "tesseract_chars": 200,
+      "mangaocr_chars": 5,
+      "improvement": -195,
+      "improvement_pct": -97.5
+    },
+    {
+      "page_num": 7,
+      "page_id": 277,
+      "tesseract_chars": 412,
+      "mangaocr_chars": 4,
+      "improvement": -408,
+      "improvement_pct": -99.02912621359224
+    },
+    {
+      "page_num": 8,
+      "page_id": 278,
+      "tesseract_chars": 137,
+      "mangaocr_chars": 8,
+      "improvement": -129,
+      "improvement_pct": -94.16058394160584
+    },
+    {
+      "page_num": 9,
+      "page_id": 279,
+      "tesseract_chars": 242,
+      "mangaocr_chars": 3,
+      "improvement": -239,
+      "improvement_pct": -98.7603305785124
+    },
+    {
+      "page_num": 10,
+      "page_id": 280,
+      "tesseract_chars": 263,
+      "mangaocr_chars": 5,
+      "improvement": -258,
+      "improvement_pct": -98.09885931558935
+    }
+  ]
+}

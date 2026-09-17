@@ -19,6 +19,12 @@ from app.services.chapter_service import chapter_service
 from app.services.page_service import page_service
 from app.utils.file_storage import ensure_dir
 
+try:
+    from manga_ocr import MangaOcr
+    MANGA_OCR_AVAILABLE = True
+except ImportError:
+    MANGA_OCR_AVAILABLE = False
+
 
 class OcrService:
     VALID_STATUSES = {"pending", "processing", "completed", "failed"}
@@ -28,6 +34,7 @@ class OcrService:
         if settings.tesseract_cmd:
             pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
         self._dependency_status = self._detect_tesseract_dependency()
+        self._manga_ocr_instance = None
 
     def refresh_dependency_status(self) -> dict[str, Any]:
         self._dependency_status = self._detect_tesseract_dependency()
@@ -258,6 +265,21 @@ class OcrService:
         custom_config = r'--psm 6 --oem 3'
         raw_text = pytesseract.image_to_string(processed, config=custom_config)
         return raw_text or ""
+
+    def _extract_raw_text_with_mangaocr(self, image_path: Path) -> str:
+        """Extract text using manga-ocr (specialized for Japanese manga)."""
+        if not MANGA_OCR_AVAILABLE:
+            raise RuntimeError("manga-ocr is not installed. Install with: pip install manga-ocr")
+        
+        if self._manga_ocr_instance is None:
+            self._manga_ocr_instance = MangaOcr()
+        
+        try:
+            # manga-ocr works directly with image paths or PIL images
+            text = self._manga_ocr_instance(str(image_path))
+            return text or ""
+        except Exception as exc:
+            raise RuntimeError(f"manga-ocr extraction failed: {exc}") from exc
 
     def _detect_tesseract_dependency(self) -> dict[str, Any]:
         tesseract_cmd = str(pytesseract.pytesseract.tesseract_cmd)
